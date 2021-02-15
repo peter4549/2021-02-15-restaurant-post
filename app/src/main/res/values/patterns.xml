@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pattern_date">M월 d일 EEEE</string>
+    <string name="pattern_time">aa h시 m분</string>
+</resources>

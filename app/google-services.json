@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "903711562933",
+    "project_id": "restaurantpost-cc125",
+    "storage_bucket": "restaurantpost-cc125.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:903711562933:android:22298710e28b0bdf6472fc",
+        "android_client_info": {
+          "package_name": "com.grand.duke.elliot.restaurantpost"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "903711562933-h1qk1mi161mh1hfe4lo101mqe0u3jv8k.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.grand.duke.elliot.restaurantpost",
+            "certificate_hash": "8bbbd93c77c7901a13734f84668d04f13696d094"
+          }
+        },
+        {
+          "client_id": "903711562933-6lmshgl7jm15tbg20eqkvji5kqb5gle9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjC4A68t4cmfGtjyVkOZO5ULx2bZ44m9E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "903711562933-6lmshgl7jm15tbg20eqkvji5kqb5gle9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
