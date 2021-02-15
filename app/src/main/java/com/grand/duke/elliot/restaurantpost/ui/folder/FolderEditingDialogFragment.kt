@@ -215,8 +215,6 @@ class FolderEditingDialogFragment: DialogFragment() {
         return binding.root
     }
 
-    private fun getColor(context: Context, id: Int) = ContextCompat.getColor(context, id)
-
     private fun insert(folder: Folder) {
         coroutineScope.launch {
             withContext(Dispatchers.IO) {

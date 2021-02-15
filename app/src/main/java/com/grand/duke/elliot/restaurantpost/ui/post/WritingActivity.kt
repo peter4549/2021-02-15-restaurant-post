@@ -6,6 +6,7 @@ import android.util.TypedValue
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.DialogFragment
 import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCallbacks
 import com.github.ksoichiro.android.observablescrollview.ScrollState
 import com.github.ksoichiro.android.observablescrollview.ScrollUtils
@@ -22,6 +23,8 @@ import com.grand.duke.elliot.restaurantpost.persistence.data.Folder
 import com.grand.duke.elliot.restaurantpost.ui.fluid_content_resize.FluidContentResize
 import com.grand.duke.elliot.restaurantpost.ui.folder.DisplayFolderListDialogFragment
 import com.grand.duke.elliot.restaurantpost.ui.folder.FolderEditingDialogFragment
+import com.grand.duke.elliot.restaurantpost.ui.tag.DisplayTagListDialogFragment
+import com.grand.duke.elliot.restaurantpost.ui.tag.TagEditingDialogFragment
 import com.grand.duke.elliot.restaurantpost.ui.util.*
 import com.grand.duke.elliot.restaurantpost.ui.util.dialog_fragment.SearchBarListAdapter
 import com.grand.duke.elliot.restaurantpost.ui.util.dialog_fragment.SearchBarListDialogFragment
@@ -177,7 +180,16 @@ class WritingActivity: AppCompatActivity(),
                 val title = getString(R.string.folder)
                 DisplayFolderListDialogFragment().apply{
                     setTitle(title)
-                }.show(supportFragmentManager, null)
+                    show(supportFragmentManager, tag)
+                }
+            }
+
+            binding.imageViewTag.setOnClickListener {
+                val title = getString(R.string.tag)
+                DisplayTagListDialogFragment().apply {
+                    setTitle(title)
+                    show(supportFragmentManager, tag)
+                }
             }
         }
     }
@@ -224,10 +236,15 @@ class WritingActivity: AppCompatActivity(),
     }
 
     /** SearchBarListDialogFragment.FragmentContainer. */
-    override fun onRequestOnClickListener(): SearchBarListDialogFragment.OnClickListener? =
+    override fun onRequestOnClickListener(): SearchBarListDialogFragment.OnClickListener =
         object: SearchBarListDialogFragment.OnClickListener {
-            override fun onAddClick() {
-                FolderEditingDialogFragment().run { show(supportFragmentManager, tag) }
+            override fun onAddClick(dialogFragment: DialogFragment) {
+                when (dialogFragment) {
+                    is DisplayFolderListDialogFragment ->
+                        FolderEditingDialogFragment().run { show(supportFragmentManager, tag) }
+                    is DisplayTagListDialogFragment ->
+                        TagEditingDialogFragment().run { show(supportFragmentManager, tag) }
+                }
             }
         }
 

@@ -15,6 +15,8 @@ import com.grand.duke.elliot.restaurantpost.repository.LocalRepository
 import com.grand.duke.elliot.restaurantpost.ui.ViewModelFactory
 import com.grand.duke.elliot.restaurantpost.ui.folder.DisplayFolderListDialogFragment
 import com.grand.duke.elliot.restaurantpost.ui.folder.FolderEditingDialogFragment
+import com.grand.duke.elliot.restaurantpost.ui.tag.DisplayTagListDialogFragment
+import com.grand.duke.elliot.restaurantpost.ui.tag.TagEditingDialogFragment
 import com.squareup.inject.assisted.dagger2.AssistedModule
 import dagger.*
 import dagger.android.ContributesAndroidInjector
@@ -97,6 +99,14 @@ abstract class FragmentBindingModule {
     @FragmentScope
     @ContributesAndroidInjector
     abstract fun folderEditingDialogFragment(): FolderEditingDialogFragment
+
+    @FragmentScope
+    @ContributesAndroidInjector
+    abstract fun displayTagListDialogFragment(): DisplayTagListDialogFragment
+
+    @FragmentScope
+    @ContributesAndroidInjector
+    abstract fun tagEditingDialogFragment(): TagEditingDialogFragment
 }
 
 @Module abstract class ViewModelFactoryModule {

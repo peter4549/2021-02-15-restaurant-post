@@ -1,12 +1,12 @@
-package com.grand.duke.elliot.restaurantpost.ui.folder
+package com.grand.duke.elliot.restaurantpost.ui.tag
 
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.grand.duke.elliot.restaurantpost.repository.data.DisplayFolder
 import com.grand.duke.elliot.restaurantpost.repository.LocalRepository
+import com.grand.duke.elliot.restaurantpost.repository.data.DisplayTag
 import com.grand.duke.elliot.restaurantpost.ui.util.dialog_fragment.SearchBarListAdapter
 import com.grand.duke.elliot.restaurantpost.ui.util.dialog_fragment.SearchBarListDialogFragment
 import dagger.android.support.AndroidSupportInjection
@@ -16,14 +16,14 @@ import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
 
-class DisplayFolderListDialogFragment: SearchBarListDialogFragment<DisplayFolder>() {
+class DisplayTagListDialogFragment: SearchBarListDialogFragment<DisplayTag>() {
 
     @Inject
     lateinit var localRepository: LocalRepository
 
-    private val displayFolderListAdapter = DisplayFolderListAdapter()
-    override val listAdapter: SearchBarListAdapter<DisplayFolder>
-        get() = displayFolderListAdapter
+    private val displayTagListAdapter = DisplayTagListAdapter()
+    override val listAdapter: SearchBarListAdapter<DisplayTag>
+        get() = displayTagListAdapter
 
     private val compositeDisposable by lazy {
         CompositeDisposable()
@@ -34,23 +34,20 @@ class DisplayFolderListDialogFragment: SearchBarListDialogFragment<DisplayFolder
         super.onAttach(context)
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view = super.onCreateView(inflater, container, savedInstanceState)
 
-        compositeDisposable.add(localRepository.folderWithPostListFlowable()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                displayFolderListAdapter.submitItemList(it.map { folderWithPostList ->
-                    DisplayFolder(folderWithPostList.folder, folderWithPostList.postList.count())
-                })
-            }, {
-                Timber.e(it)
-            }))
+        compositeDisposable.add(localRepository.tagWithPostListFlowable()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    println("HHHHHHH: ${it.map { a -> a.tag }}")
+                    displayTagListAdapter.submitItemList(it.map { tagWithPostList ->
+                        DisplayTag(tagWithPostList.tag, tagWithPostList.postList.count())
+                    })
+                }, {
+                    Timber.e(it)
+                }))
 
         return view
     }

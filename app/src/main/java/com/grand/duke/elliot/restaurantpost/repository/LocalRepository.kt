@@ -5,10 +5,9 @@ import com.grand.duke.elliot.restaurantpost.persistence.dao.PlaceDao
 import com.grand.duke.elliot.restaurantpost.persistence.dao.PostDao
 import com.grand.duke.elliot.restaurantpost.persistence.dao.TagDao
 import com.grand.duke.elliot.restaurantpost.repository.data.FolderWithPostList
-import dagger.android.AndroidInjection
+import com.grand.duke.elliot.restaurantpost.repository.data.TagWithPostList
 import io.reactivex.Flowable
 import javax.inject.Inject
-import javax.inject.Singleton
 
 class LocalRepository @Inject constructor(
     private val folderDao: FolderDao,
@@ -17,10 +16,18 @@ class LocalRepository @Inject constructor(
     private val tagDao: TagDao
 ) {
     @Suppress("SpellCheckingInspection")
-    private val postListInFolderFlowable: Flowable<List<FolderWithPostList>> by lazy {
+    private val folderWithPostListFlowable: Flowable<List<FolderWithPostList>> by lazy {
         folderDao.getAll()
     }
 
     @Suppress("SpellCheckingInspection")
-    fun postListInFolderFlowable() = postListInFolderFlowable
+    fun folderWithPostListFlowable() = folderWithPostListFlowable
+
+    @Suppress("SpellCheckingInspection")
+    private val tagWithPostListFlowable: Flowable<List<TagWithPostList>> by lazy {
+        tagDao.getAll()
+    }
+
+    @Suppress("SpellCheckingInspection")
+    fun tagWithPostListFlowable() = tagWithPostListFlowable
 }

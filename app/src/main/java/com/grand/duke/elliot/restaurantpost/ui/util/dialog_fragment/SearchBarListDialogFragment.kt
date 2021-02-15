@@ -30,7 +30,7 @@ abstract class SearchBarListDialogFragment<T>: DialogFragment() {
     private var onItemClickListener: SearchBarListAdapter.OnItemClickListener<T>? = null
 
     interface OnClickListener {
-        fun onAddClick()
+        fun onAddClick(dialogFragment: DialogFragment)
     }
 
     interface FragmentContainer {
@@ -62,7 +62,7 @@ abstract class SearchBarListDialogFragment<T>: DialogFragment() {
         binding = FragmentSearchBarListDialogBinding.inflate(inflater, container, false)
         binding.textViewTitle.text = title
         binding.imageViewAdd.setOnClickListener {
-            onClickListener?.onAddClick()
+            onClickListener?.onAddClick(this)
         }
 
         init()

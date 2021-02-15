@@ -11,6 +11,7 @@ import com.grand.duke.elliot.restaurantpost.persistence.data.Folder
 import com.grand.duke.elliot.restaurantpost.persistence.data.Place
 import com.grand.duke.elliot.restaurantpost.persistence.data.Post
 import com.grand.duke.elliot.restaurantpost.persistence.data.Tag
+import com.grand.duke.elliot.restaurantpost.repository.data.TagPostListCrossRef
 
 @Database (entities = [Folder::class, Place::class, Post::class, Tag::class],
     version = 1, exportSchema = false
