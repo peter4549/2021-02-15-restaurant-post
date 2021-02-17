@@ -28,7 +28,7 @@ class DisplayTagListAdapter: SearchBarListAdapter<DisplayTag>() {
         viewHolder.binding.textViewCount.text = displayTag.postListCount.toString()
 
         viewHolder.binding.imageViewMore.setOnClickListener {
-            onItemClickListener?.onMoreClick(adapterItem.item, viewHolder.adapterPosition)
+            showPopupMenu(it, displayTag, viewHolder.adapterPosition)
         }
 
         viewHolder.binding.root.setOnClickListener {

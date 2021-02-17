@@ -1,5 +1,6 @@
 package com.grand.duke.elliot.restaurantpost.persistence
 
+import android.net.Uri
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.grand.duke.elliot.restaurantpost.persistence.data.Place
@@ -19,4 +20,10 @@ class Converters {
 
     @TypeConverter
     fun jsonToPlace(value: String): Place = gson.fromJson(value, Place::class.java)
+
+    @TypeConverter
+    fun uriArrayToJson(value: Array<Uri>): String = gson.toJson(value)
+
+    @TypeConverter
+    fun jsonToUriArray(value: String): Array<Uri> = gson.fromJson(value, Array<Uri>::class.java)
 }

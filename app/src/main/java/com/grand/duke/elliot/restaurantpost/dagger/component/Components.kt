@@ -17,7 +17,8 @@ import javax.inject.Singleton
     ActivityBindingModule::class,
     FragmentBindingModule::class,
     ViewModelFactoryModule::class,
-    ViewModelModule::class
+    ViewModelModule::class,
+    WritingModule::class
 ])
 interface ApplicationComponent: AndroidInjector<MainApplication> {
     @Component.Builder
@@ -28,9 +29,4 @@ interface ApplicationComponent: AndroidInjector<MainApplication> {
     }
 
     override fun inject(mainApplication: MainApplication)
-}
-
-@Component(modules = [WritingModule::class])
-interface WritingComponent{
-    fun inject(writingActivity: WritingActivity)
 }

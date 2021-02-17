@@ -2,20 +2,21 @@ package com.grand.duke.elliot.restaurantpost.persistence.data
 
 import android.os.Parcelable
 import androidx.annotation.ColorInt
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import androidx.room.*
 import kotlinx.android.parcel.Parcelize
 
 @Entity(tableName = "folder")
 @Parcelize
 data class Folder (
-    @PrimaryKey
-    var name: String,
-    @ColorInt
-    var color: Int
+        @PrimaryKey(autoGenerate = true)
+        @ColumnInfo(name = "folder_id") val id: Long = 0L,
+        var name: String,
+        @ColorInt
+        var color: Int
 ): Parcelable {
     fun deepCopy() = Folder(
-        name = this.name,
-        color = this.color
+            id = this.id,
+            name = this.name,
+            color = this.color
     )
 }

@@ -1,6 +1,7 @@
 package com.grand.duke.elliot.restaurantpost.ui.util
 
 import android.content.Context
+import android.content.res.Resources
 import android.text.Html
 import android.util.DisplayMetrics
 import android.widget.TextView
@@ -16,6 +17,14 @@ fun convertDpToPx(context: Context, dp: Float)
         = dp * (context.resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
 
 fun Int.isZero() = this == 0
+
+fun Int.toDp(): Float {
+    return this / Resources.getSystem().displayMetrics.density
+}
+
+fun Int.toPx(): Float {
+    return this * Resources.getSystem().displayMetrics.density
+}
 
 fun setTextWithSearchWordColorChange(
     textView: TextView, text: String,

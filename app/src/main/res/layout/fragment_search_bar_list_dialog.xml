@@ -21,10 +21,10 @@
                 android:layout_height="wrap_content"
                 android:textSize="@dimen/text_size_medium_large"
                 android:textStyle="bold"
-                android:paddingBottom="@dimen/spacing_medium"
-                android:paddingEnd="@dimen/spacing_medium_large"
-                android:paddingStart="@dimen/spacing_medium_large"
-                android:paddingTop="@dimen/spacing_medium"
+                android:paddingBottom="@dimen/spacing_small"
+                android:paddingEnd="@dimen/spacing_medium"
+                android:paddingStart="@dimen/spacing_medium"
+                android:paddingTop="@dimen/spacing_small"
                 tools:text="Title" />
 
             <LinearLayout
@@ -35,22 +35,21 @@
 
                 <androidx.appcompat.widget.SearchView
                     android:id="@+id/search_view"
+                    android:theme="@style/SearchView"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layoutDirection="rtl"
-                    android:layout_marginTop="@dimen/spacing_small"
                     android:layout_marginEnd="@dimen/spacing_small"
-                    android:layout_marginBottom="@dimen/spacing_small"
                     android:visibility="visible" />
 
                 <ImageView
                     android:id="@+id/image_view_add"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:layout_marginTop="@dimen/spacing_small"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginTop="@dimen/spacing_extra_small"
                     android:layout_marginEnd="@dimen/spacing_small"
-                    android:layout_marginBottom="4.5dp"
+                    android:layout_marginBottom="@dimen/spacing_extra_small"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     app:srcCompat="@drawable/ic_round_add_24"
                     app:tint="@color/color_icon"

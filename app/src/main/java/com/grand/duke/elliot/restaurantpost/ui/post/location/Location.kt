@@ -18,7 +18,6 @@ class Location(private val activity: Activity) {
             LocationServices.getFusedLocationProviderClient(activity)
         if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
             return
         }
 

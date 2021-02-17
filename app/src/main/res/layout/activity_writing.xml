@@ -13,9 +13,9 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@android:color/transparent"
+            android:elevation="4dp"
             android:minHeight="?attr/actionBarSize"
             android:theme="@style/Theme.Toolbar"
-            android:elevation="4dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -33,8 +33,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <com.github.ksoichiro.android.observablescrollview.ObservableScrollView
-            android:id="@+id/observable_scroll_view"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -42,149 +41,168 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/view_anchor">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.github.ksoichiro.android.observablescrollview.ObservableScrollView
+                android:id="@+id/observable_scroll_view"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <RelativeLayout
-                    android:id="@+id/relative_layout_view_pager"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/parallax_image_height"
-                    android:background="@color/background"
-                    android:visibility="gone"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                    <androidx.viewpager2.widget.ViewPager2
-                        android:id="@+id/view_pager"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <com.tbuonomo.viewpagerdotsindicator.WormDotsIndicator
-                        android:id="@+id/worm_dots_indicator"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentBottom="true"
-                        android:layout_centerHorizontal="true"
-                        android:layout_marginBottom="@dimen/spacing_medium"
-                        android:elevation="2dp"
-                        app:dotsColor="@color/worm_dots_indicator_dots"
-                        app:dotsStrokeColor="@color/worm_dots_indicator_dots_stroke"
-                        app:dotsCornerRadius="8dp"
-                        app:dotsSize="12dp"
-                        app:dotsSpacing="4dp"
-                        app:dotsStrokeWidth="2dp" />
-                </RelativeLayout>
-
+                android:layout_height="wrap_content"
+                android:fillViewport="true">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/constraintLayout_text"
+                    android:id="@+id/constraint_layout_content"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@color/background"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/relative_layout_view_pager">
+                    android:layout_height="match_parent">
 
-                    <TextView
-                        android:id="@+id/text_view_time"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/spacing_medium"
-                        android:layout_marginTop="@dimen/spacing_small"
-                        android:drawablePadding="@dimen/spacing_small"
-                        android:gravity="center_vertical"
-                        android:textSize="@dimen/text_size_small"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:drawableStartCompat="@drawable/ic_round_access_time_16"
-                        tools:text="오후 3시 29분"/>
-
-                    <TextView
-                        android:id="@+id/text_view_date"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/spacing_medium"
-                        android:layout_marginTop="@dimen/spacing_small"
-                        android:drawablePadding="@dimen/spacing_small"
-                        android:gravity="center_vertical"
-                        android:textSize="@dimen/text_size_medium"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/text_view_time"
-                        app:drawableStartCompat="@drawable/ic_round_calendar_today_16"
-                        tools:text="1월 21일 목요일" />
-
-                    <com.google.android.material.chip.ChipGroup
-                        android:id="@+id/chip_group"
+                    <RelativeLayout
+                        android:id="@+id/relative_layout_view_pager"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="@dimen/spacing_small"
-                        android:layout_marginStart="@dimen/spacing_small"
-                        android:animateLayoutChanges="true"
-                        app:singleSelection="false"
-                        app:layout_constraintBottom_toTopOf="@+id/edit_text_description"
+                        android:layout_height="@dimen/parallax_image_height"
+                        android:background="@color/background"
+                        android:visibility="gone"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/text_view_date" />
+                        app:layout_constraintTop_toTopOf="parent">
 
-                    <EditText
-                        android:id="@+id/edit_text_description"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/spacing_medium"
-                        android:layout_marginTop="@dimen/spacing_small"
-                        android:layout_marginEnd="@dimen/spacing_medium"
-                        android:layout_marginBottom="@dimen/spacing_small"
+                        <androidx.viewpager2.widget.ViewPager2
+                            android:id="@+id/view_pager"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <com.tbuonomo.viewpagerdotsindicator.WormDotsIndicator
+                            android:id="@+id/worm_dots_indicator"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="true"
+                            android:layout_centerHorizontal="true"
+                            android:layout_marginBottom="@dimen/spacing_medium"
+                            android:elevation="1dp"
+                            app:dotsColor="@color/worm_dots_indicator_dots"
+                            app:dotsCornerRadius="8dp"
+                            app:dotsSize="12dp"
+                            app:dotsSpacing="4dp"
+                            app:dotsStrokeColor="@color/worm_dots_indicator_dots_stroke"
+                            app:dotsStrokeWidth="1dp" />
+                    </RelativeLayout>
+
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/constraintLayout_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@color/background"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/relative_layout_view_pager">
+
+                        <TextView
+                            android:id="@+id/text_view_time"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/spacing_medium"
+                            android:layout_marginTop="@dimen/spacing_small"
+                            android:drawablePadding="@dimen/spacing_small"
+                            android:gravity="center_vertical"
+                            android:textSize="@dimen/text_size_small"
+                            app:drawableStartCompat="@drawable/ic_round_access_time_16"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:text="오후 3시 29분" />
+
+                        <TextView
+                            android:id="@+id/text_view_date"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/spacing_medium"
+                            android:layout_marginTop="@dimen/spacing_small"
+                            android:drawablePadding="@dimen/spacing_small"
+                            android:gravity="center_vertical"
+                            android:textSize="@dimen/text_size_medium"
+                            app:drawableStartCompat="@drawable/ic_round_calendar_today_16"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/text_view_time"
+                            tools:text="1월 21일 목요일" />
+
+                        <com.google.android.material.chip.ChipGroup
+                            android:id="@+id/chip_group"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/spacing_small"
+                            android:layout_marginEnd="@dimen/spacing_small"
+                            android:animateLayoutChanges="true"
+                            app:layout_constraintBottom_toTopOf="@+id/edit_text_description"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/text_view_date"
+                            app:singleSelection="false" />
+
+                        <EditText
+                            android:id="@+id/edit_text_description"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/spacing_medium"
+                            android:layout_marginTop="@dimen/spacing_small"
+                            android:layout_marginEnd="@dimen/spacing_medium"
+                            android:layout_marginBottom="@dimen/spacing_small"
+                            android:background="@android:color/transparent"
+                            android:ems="10"
+                            android:gravity="top|start"
+                            android:hint="@string/edit_text_description_hint"
+                            android:importantForAutofill="no"
+                            android:inputType="textMultiLine"
+                            android:lineSpacingMultiplier="@dimen/line_spacing_multiplier"
+                            android:minHeight="200dp"
+                            android:paddingTop="@dimen/spacing_small"
+                            android:paddingBottom="@dimen/spacing_small"
+                            android:textSize="@dimen/text_size_medium"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/chip_group"
+                            tools:ignore="LabelFor"
+                            tools:text="Sekiro: Shadow Dies Twice Full Story Movie" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <LinearLayout
+                        android:id="@+id/linear_layout_place"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/constraintLayout_text">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chip_place"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/spacing_small"
+                            android:layout_marginTop="@dimen/spacing_medium"
+                            android:layout_marginEnd="@dimen/spacing_small"
+                            android:layout_marginBottom="@dimen/spacing_medium"
+                            app:chipIcon="@drawable/ic_round_location_on_24"
+                            tools:text="서울특별시" />
+
+                        <fragment
+                            android:id="@+id/fragment_support_map"
+                            android:name="com.google.android.gms.maps.SupportMapFragment"
+                            android:layout_width="match_parent"
+                            android:layout_height="224dp"
+                            tools:context=".ui.post.WritingActivity"
+                            tools:ignore="FragmentTagUsage" />
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:id="@+id/frame_layout_space"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
                         android:background="@android:color/transparent"
-                        android:ems="10"
-                        android:gravity="top|start"
-                        android:hint="@string/edit_text_description_hint"
-                        android:importantForAutofill="no"
-                        android:inputType="textMultiLine"
-                        android:lineSpacingMultiplier="@dimen/line_spacing_multiplier"
-                        android:minHeight="224dp"
-                        android:paddingTop="@dimen/spacing_small"
-                        android:paddingBottom="@dimen/spacing_small"
-                        android:textSize="@dimen/text_size_medium"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/chip_group"
-                        tools:ignore="LabelFor"
-                        tools:text="Sekiro: Shadow Dies Twice Full Story Movie" />
+                        app:layout_constraintTop_toBottomOf="@+id/linear_layout_place" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_place"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/spacing_medium"
-                    android:layout_marginEnd="@dimen/spacing_small"
-                    android:layout_marginStart="@dimen/spacing_small"
-                    android:layout_marginTop="@dimen/spacing_medium"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/constraintLayout_text"
-                    app:chipIcon="@drawable/ic_round_location_on_24"
-                    tools:text="서울특별시"/>
-
-                <fragment
-                    android:id="@+id/fragment_support_map"
-                    android:name="com.google.android.gms.maps.SupportMapFragment"
-                    android:layout_width="match_parent"
-                    android:layout_height="224dp"
-                    android:layout_marginEnd="@dimen/spacing_small"
-                    android:layout_marginStart="@dimen/spacing_small"
-                    android:layout_marginTop="@dimen/spacing_medium"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/chip_place"
-                    tools:context=".ui.post.WritingActivity"
-                    tools:ignore="FragmentTagUsage" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </com.github.ksoichiro.android.observablescrollview.ObservableScrollView>
+            </com.github.ksoichiro.android.observablescrollview.ObservableScrollView>
+        </FrameLayout>
 
 
         <LinearLayout

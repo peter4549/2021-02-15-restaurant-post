@@ -12,6 +12,7 @@ import androidx.annotation.StyleRes
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import com.grand.duke.elliot.restaurantpost.R
+import com.grand.duke.elliot.restaurantpost.application.MainApplication
 import com.grand.duke.elliot.restaurantpost.databinding.FragmentTagEditingDialogBinding
 import com.grand.duke.elliot.restaurantpost.persistence.dao.TagDao
 import com.grand.duke.elliot.restaurantpost.persistence.data.Tag
@@ -35,15 +36,10 @@ class TagEditingDialogFragment: DialogFragment() {
     }
 
     private var tag: Tag? = null
-    private var position: Int = -1
     private var textAppearance: Int = -1
 
     fun setTag(tag: Tag) {
         this.tag = tag
-    }
-
-    fun setPosition(position: Int) {
-        this.position = position
     }
 
     fun setTextAppearance(@StyleRes textAppearance: Int) {
@@ -53,7 +49,7 @@ class TagEditingDialogFragment: DialogFragment() {
     private var onTagUpdatedListener: OnTagUpdatedListener? = null
 
     interface OnTagUpdatedListener {
-        fun onTagUpdated(tag: Tag, position: Int)
+        fun onTagUpdated(tag: Tag)
         fun onError(throwable: Throwable)
     }
 
@@ -67,15 +63,12 @@ class TagEditingDialogFragment: DialogFragment() {
     private val coroutineScope = CoroutineScope(Dispatchers.Main + job)
 
     private object Key {
-        const val Position = "com.grand.duke.elliot.restaurantpost.ui.tag" +
-                ".TagEditingDialogFragment.Key.Position"
         const val Tag =  "com.grand.duke.elliot.restaurantpost.ui.tag" +
                 ".TagEditingDialogFragment.Key.Tag"
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putInt(Key.Position, position)
         outState.putParcelable(Key.Tag, tag)
     }
 
@@ -111,7 +104,6 @@ class TagEditingDialogFragment: DialogFragment() {
         )
 
         savedInstanceState?.run {
-            position = savedInstanceState.getInt(Key.Position)
             tag = savedInstanceState.getParcelable(Key.Tag)
         }
 
@@ -122,7 +114,10 @@ class TagEditingDialogFragment: DialogFragment() {
             binding.textViewTitle.text = getString(R.string.create_tag)
         }
 
-        binding.textViewOk.setOnClickListener {
+        binding.buttonCancel.setTextColor(MainApplication.themePrimaryColor)
+        binding.buttonOk.setTextColor(MainApplication.themePrimaryColor)
+
+        binding.buttonOk.setOnClickListener {
             tag?.run {
                 val name = binding.textInputEditText.text.toString()
 
@@ -131,21 +126,20 @@ class TagEditingDialogFragment: DialogFragment() {
                         it.name = name
 
                         update(it)
-                        onTagUpdatedListener?.onTagUpdated(it, position)
                     }
                 } else {
                     binding.textInputLayout.isErrorEnabled = true
-                    binding.textInputLayout.error = getString(R.string.tag)
+                    binding.textInputLayout.error = getString(R.string.enter_tag_name)
                 }
             } ?: run {
                 createTag()?.let { tag -> insert(tag) } ?: run {
                     binding.textInputLayout.isErrorEnabled = true
-                    binding.textInputLayout.error = getString(R.string.tag)
+                    binding.textInputLayout.error = getString(R.string.enter_tag_name)
                 }
             }
         }
 
-        binding.textViewCancel.setOnClickListener {
+        binding.buttonCancel.setOnClickListener {
             dismiss()
         }
 
@@ -182,7 +176,7 @@ class TagEditingDialogFragment: DialogFragment() {
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe({
-                            onTagUpdatedListener?.onTagUpdated(tag, position)
+                            onTagUpdatedListener?.onTagUpdated(tag)
                         }, { throwable ->
                             onTagUpdatedListener?.onError(throwable)
                         }))

@@ -2,14 +2,14 @@ package com.grand.duke.elliot.restaurantpost.persistence.dao
 
 import androidx.room.*
 import com.grand.duke.elliot.restaurantpost.persistence.data.Folder
-import com.grand.duke.elliot.restaurantpost.repository.data.FolderWithPostList
+import com.grand.duke.elliot.restaurantpost.persistence.data.FolderWithPostList
 import io.reactivex.Completable
 import io.reactivex.Flowable
 
 @Dao
 interface FolderDao {
     @Transaction
-    @Query("SELECT * FROM folder")
+    @Query("SELECT * FROM folder ORDER BY name ASC")
     fun getAll(): Flowable<List<FolderWithPostList>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)

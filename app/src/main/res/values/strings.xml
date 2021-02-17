@@ -1,7 +1,10 @@
 <resources>
     <string name="app_name">RestaurantPost</string>
+    <string name="file_provider_authorities">com.grand.duke.elliot.restaurantpost.fileprovider</string>
 
     <string name="cancel">취소</string>
+    <string name="delete">삭제</string>
+    <string name="edit">편집</string>
     <string name="ok">확인</string>
 
     <!-- Place. -->
@@ -9,6 +12,9 @@
 
     <!-- WritingActivity. -->
     <string name="edit_text_description_hint">여기에 입력하세요.</string>
+    <string name="photo">사진</string>
+    <string name="photo_shoot">사진 촬영</string>
+    <string name="select_from_album">앨범에서 선택</string>
     <string name="tag">태그</string>
 
     <!-- SearchBarListDialogFragment. -->
@@ -20,7 +26,7 @@
     <!-- FolderEditingDialogFragment. -->
     <string name="create_folder">폴더 만들기</string>
     <string name="edit_folder">폴더 편집</string>
-    <string name="enter_folder_name">폴더이름을 입력하세요.</string>
+    <string name="enter_folder_name">폴더 이름을 입력하세요.</string>
     <string name="folder_name">폴더 이름</string>
     <string name="select_folder_color_title">폴더 색상 선택</string>
     <string name="select_folder_color_message">폴더 색상을 선택하세요.</string>
@@ -28,4 +34,6 @@
     <!-- TagEditingDialogFragment. -->
     <string name="create_tag">태그 만들기</string>
     <string name="edit_tag">태그 편집</string>
+    <string name="enter_tag_name">태그 이름을 입력하세요.</string>
+    <string name="tag_name">태그 이름</string>
 </resources>

@@ -6,7 +6,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/surface">
+        android:background="@drawable/rounded_corner"
+        android:backgroundTint="@color/surface">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -15,33 +16,32 @@
             <TextView
                 android:id="@+id/text_view_title"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:paddingBottom="@dimen/spacing_medium"
+                android:layout_height="64dp"
+                android:gravity="center_vertical"
                 android:paddingEnd="@dimen/spacing_medium_large"
                 android:paddingStart="@dimen/spacing_medium_large"
-                android:paddingTop="@dimen/spacing_medium"
-                android:textSize="@dimen/text_size_medium_large"
+                android:textSize="@dimen/text_size_extra_large"
+                android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="폴더 만들기" />
 
             <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:id="@+id/text_input_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/spacing_medium"
-                android:layout_marginStart="@dimen/spacing_medium"
-                android:layout_marginTop="@dimen/spacing_small"
+                android:layout_marginEnd="@dimen/spacing_medium_large"
+                android:layout_marginStart="@dimen/spacing_medium_large"
                 android:gravity="center_vertical"
                 android:hint="@string/folder_name"
-                app:boxBackgroundColor="@color/background"
-                app:boxStrokeColor="@color/color_icon"
+                app:boxBackgroundColor="@color/surface"
+                app:boxStrokeColor="@color/color_box_stroke"
                 app:boxStrokeErrorColor="@color/error"
-                app:boxStrokeWidth="0dp"
+                app:boxStrokeWidth="2dp"
                 app:endIconMode="clear_text"
-                app:endIconTint="@color/color_icon"
+                app:endIconTint="@color/end_icon"
                 app:errorEnabled="true"
                 app:errorIconTint="@color/error"
                 app:errorTextColor="@color/error"
@@ -55,11 +55,11 @@
                     android:id="@+id/text_input_edit_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/spacing_small"
+                    android:layout_marginBottom="@dimen/spacing_extra_small"
                     android:gravity="center_vertical"
                     android:inputType="textPersonName"
                     android:textColor="@color/color_text_high_emphasis"
-                    android:textSize="@dimen/text_size_medium"
+                    android:textSize="@dimen/text_size_medium_large"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toStartOf="parent" />
@@ -88,19 +88,18 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_small"
                         android:text="@string/select_folder_color_title"
-                        android:textSize="@dimen/text_size_medium"
-                        android:padding="8dp"/>
+                        android:textSize="@dimen/text_size_medium_large" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/spacing_small"
+                        android:layout_marginTop="@dimen/spacing_small"
                         android:text="@string/select_folder_color_message"
                         android:textColor="@color/color_text_medium_emphasis"
-                        android:textSize="@dimen/text_size_small"
-                        android:paddingBottom="@dimen/spacing_small"
-                        android:paddingEnd="@dimen/spacing_small"
-                        android:paddingStart="@dimen/spacing_small" />
+                        android:textSize="@dimen/text_size_small" />
                 </LinearLayout>
 
                 <androidx.cardview.widget.CardView
@@ -111,38 +110,32 @@
                     app:cardCornerRadius="8dp" />
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/text_view_ok"
+            <Button
+                android:id="@+id/button_ok"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_medium_large"
-                android:layout_marginEnd="@dimen/spacing_medium"
-                android:layout_marginBottom="@dimen/spacing_medium"
+                android:layout_marginTop="@dimen/spacing_medium"
+                android:layout_marginEnd="@dimen/spacing_small"
+                android:layout_marginBottom="@dimen/spacing_small"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:paddingBottom="@dimen/spacing_small"
-                android:paddingEnd="@dimen/spacing_medium"
-                android:paddingStart="@dimen/spacing_medium"
-                android:paddingTop="@dimen/spacing_small"
                 android:text="@string/ok"
-                android:textSize="@dimen/text_size_medium_large"
+                android:textSize="@dimen/text_size_medium"
+                android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/linear_layout_select_folder_color" />
 
-            <TextView
-                android:id="@+id/text_view_cancel"
+            <Button
+                android:id="@+id/button_cancel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/spacing_small"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:text="@string/cancel"
-                android:textSize="@dimen/text_size_medium_large"
-                android:paddingBottom="@dimen/spacing_small"
-                android:paddingEnd="@dimen/spacing_medium"
-                android:paddingStart="@dimen/spacing_medium"
-                android:paddingTop="@dimen/spacing_small"
-                app:layout_constraintEnd_toStartOf="@+id/text_view_ok"
-                app:layout_constraintTop_toTopOf="@+id/text_view_ok" />
+                android:textSize="@dimen/text_size_medium"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toStartOf="@+id/button_ok"
+                app:layout_constraintTop_toTopOf="@+id/button_ok" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </RelativeLayout>
 </layout>

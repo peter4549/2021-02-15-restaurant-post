@@ -17,9 +17,13 @@
     <color name="medium_emphasis">#99000000</color>
     <color name="disabled">#61000000</color>
 
+    <color name="chip_background">@color/medium_emphasis</color>
+
     <!-- WormDotsIndicator -->
     <color name="worm_dots_indicator_dots">@color/white</color>
     <color name="worm_dots_indicator_dots_stroke">@color/white</color>
+
+    <color name="end_icon">@color/high_emphasis</color>
 
     <!-- Material Colors 400 -->
     <color name="red_400">#ef5350</color>

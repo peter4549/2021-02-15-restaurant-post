@@ -41,7 +41,6 @@ class DisplayTagListDialogFragment: SearchBarListDialogFragment<DisplayTag>() {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                    println("HHHHHHH: ${it.map { a -> a.tag }}")
                     displayTagListAdapter.submitItemList(it.map { tagWithPostList ->
                         DisplayTag(tagWithPostList.tag, tagWithPostList.postList.count())
                     })

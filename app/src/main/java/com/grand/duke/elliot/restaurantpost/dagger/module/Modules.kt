@@ -5,16 +5,15 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
+import com.grand.duke.elliot.restaurantpost.dagger.ActivityScope
 import com.grand.duke.elliot.restaurantpost.dagger.FragmentScope
 import com.grand.duke.elliot.restaurantpost.persistence.AppDatabase
-import com.grand.duke.elliot.restaurantpost.persistence.dao.FolderDao
-import com.grand.duke.elliot.restaurantpost.persistence.dao.PlaceDao
-import com.grand.duke.elliot.restaurantpost.persistence.dao.PostDao
-import com.grand.duke.elliot.restaurantpost.persistence.dao.TagDao
+import com.grand.duke.elliot.restaurantpost.persistence.dao.*
 import com.grand.duke.elliot.restaurantpost.repository.LocalRepository
 import com.grand.duke.elliot.restaurantpost.ui.ViewModelFactory
 import com.grand.duke.elliot.restaurantpost.ui.folder.DisplayFolderListDialogFragment
 import com.grand.duke.elliot.restaurantpost.ui.folder.FolderEditingDialogFragment
+import com.grand.duke.elliot.restaurantpost.ui.post.WritingActivity
 import com.grand.duke.elliot.restaurantpost.ui.tag.DisplayTagListDialogFragment
 import com.grand.duke.elliot.restaurantpost.ui.tag.TagEditingDialogFragment
 import com.squareup.inject.assisted.dagger2.AssistedModule
@@ -63,13 +62,20 @@ class ApplicationModule {
 
     @Provides
     @Singleton
+    internal fun provideTagPostListDao(appDatabase: AppDatabase): TagPostListCrossRefDao {
+        return appDatabase.tagPostListCrossRefDao()
+    }
+
+    @Provides
+    @Singleton
     internal fun provideLocalRepository(
         folderDao: FolderDao,
         placeDao: PlaceDao,
         postDao: PostDao,
-        tagDao: TagDao
+        tagDao: TagDao,
+        tagPostListCrossRefDao: TagPostListCrossRefDao
     ): LocalRepository {
-        return LocalRepository(folderDao, placeDao, postDao, tagDao)
+        return LocalRepository(folderDao, placeDao, postDao, tagDao, tagPostListCrossRefDao)
     }
 
     /*
@@ -126,7 +132,11 @@ abstract class ViewModelModule {
 
 @AssistedModule
 @Module(includes = [AssistedInject_WritingModule::class])
-class WritingModule
+abstract class WritingModule {
+    @ActivityScope
+    @ContributesAndroidInjector
+    abstract fun writingActivity(): WritingActivity
+}
 
 @MustBeDocumented
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)

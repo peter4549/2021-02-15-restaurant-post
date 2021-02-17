@@ -1,12 +1,14 @@
 package com.grand.duke.elliot.restaurantpost.ui.util.dialog_fragment
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.Filter
-import android.widget.Toast
+import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.grand.duke.elliot.restaurantpost.R
 import com.grand.duke.elliot.restaurantpost.databinding.ItemListBinding
 import com.grand.duke.elliot.restaurantpost.ui.util.blank
 
@@ -25,8 +27,9 @@ abstract class SearchBarListAdapter<T>: ListAdapter<AdapterItem<T>, SearchBarLis
     }
 
     interface OnItemClickListener<T> {
+        fun onDeleteClick(item: T)
+        fun onEditClick(item: T)
         fun onItemClick(item: T, adapterPosition: Int)
-        fun onMoreClick(item: T, adapterPosition: Int)
     }
 
     fun submitItemList(itemList: List<T>) {
@@ -38,7 +41,7 @@ abstract class SearchBarListAdapter<T>: ListAdapter<AdapterItem<T>, SearchBarLis
         submitList(ArrayList(adapterItemList))
     }
 
-    protected var menuRes = -1
+    protected var menuRes = R.menu.menu_search_bar_list_adapter
     protected var searchWord = blank
 
     class ViewHolder(val binding: ItemListBinding): RecyclerView.ViewHolder(binding.root)
@@ -105,6 +108,32 @@ abstract class SearchBarListAdapter<T>: ListAdapter<AdapterItem<T>, SearchBarLis
                 }
             }
         }
+    }
+
+    protected fun showPopupMenu(view: View, item: T, position: Int) {
+        val popupMenu = PopupMenu(view.context, view)
+        popupMenu.inflate(menuRes)
+        popupMenu.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.item_edit -> {
+                    onItemClickListener?.onEditClick(item)
+                    true
+                }
+                R.id.item_delete -> {
+                    removeAt(position)
+                    onItemClickListener?.onDeleteClick(item)
+                    true
+                }
+                else -> false
+            }
+        }
+
+        popupMenu.show()
+    }
+
+    private fun removeAt(position: Int) {
+        adapterItemList.removeAt(position)
+        notifyItemRemoved(position)
     }
 }
 

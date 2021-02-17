@@ -27,7 +27,7 @@ class DisplayFolderListAdapter : SearchBarListAdapter<DisplayFolder>() {
         viewHolder.binding.viewColorBar.setBackgroundColor(displayFolder.folder.color)
 
         viewHolder.binding.imageViewMore.setOnClickListener {
-            onItemClickListener?.onMoreClick(adapterItem.item, viewHolder.adapterPosition)
+            showPopupMenu(it, displayFolder, viewHolder.adapterPosition)
         }
 
         viewHolder.binding.root.setOnClickListener {

@@ -63,7 +63,7 @@
                 android:layout_marginBottom="@dimen/spacing_small"
                 android:gravity="center"
                 android:maxLines="1"
-                android:textSize="@dimen/text_size_small"
+                android:textSize="@dimen/text_size_medium"
                 tools:text="10" />
 
             <ImageView
@@ -71,7 +71,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginTop="@dimen/spacing_small"
-                android:layout_marginEnd="@dimen/spacing_medium"
+                android:layout_marginEnd="@dimen/spacing_small"
                 android:layout_marginBottom="@dimen/spacing_small"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 app:srcCompat="@drawable/ic_round_more_vert_24"

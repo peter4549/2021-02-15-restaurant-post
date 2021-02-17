@@ -8,12 +8,10 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.LayoutRes
 import androidx.annotation.StyleRes
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
-import com.google.android.material.resources.TextAppearance
 import com.grand.duke.elliot.restaurantpost.R
 import com.grand.duke.elliot.restaurantpost.application.MainApplication
 import com.grand.duke.elliot.restaurantpost.databinding.FragmentFolderEditingDialogBinding
@@ -26,6 +24,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.*
 import petrov.kristiyan.colorpicker.ColorPicker
+import timber.log.Timber
 import javax.inject.Inject
 
 class FolderEditingDialogFragment: DialogFragment() {
@@ -36,15 +35,10 @@ class FolderEditingDialogFragment: DialogFragment() {
     private lateinit var binding: FragmentFolderEditingDialogBinding
 
     private var folder: Folder? = null
-    private var position: Int = -1
     private var textAppearance: Int = -1
 
     fun setFolder(folder: Folder) {
         this.folder = folder
-    }
-
-    fun setPosition(position: Int) {
-        this.position = position
     }
 
     fun setTextAppearance(@StyleRes textAppearance: Int) {
@@ -54,7 +48,7 @@ class FolderEditingDialogFragment: DialogFragment() {
     private var onFolderUpdatedListener: OnFolderUpdatedListener? = null
 
     interface OnFolderUpdatedListener {
-        fun onFolderUpdated(folder: Folder, position: Int)
+        fun onFolderUpdated(folder: Folder)
         fun onError(throwable: Throwable)
     }
 
@@ -69,15 +63,12 @@ class FolderEditingDialogFragment: DialogFragment() {
     private val coroutineScope = CoroutineScope(Dispatchers.Main + job)
 
     private object Key {
-        const val Position = "com.grand.duke.elliot.restaurantpost.ui.folder" +
-                ".FolderEditingDialogFragment.Key.Position"
         const val Folder =  "com.grand.duke.elliot.restaurantpost.ui.folder" +
                 ".FolderEditingDialogFragment.Key.Folder"
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putInt(Key.Position, position)
         outState.putParcelable(Key.Folder, folder)
     }
 
@@ -113,7 +104,6 @@ class FolderEditingDialogFragment: DialogFragment() {
         )
 
         savedInstanceState?.run {
-            position = savedInstanceState.getInt(Key.Position)
             folder = savedInstanceState.getParcelable(Key.Folder)
         }
 
@@ -127,17 +117,19 @@ class FolderEditingDialogFragment: DialogFragment() {
 
         binding.cardViewFolderColor.setCardBackgroundColor(color)
 
-        binding.textViewOk.setOnClickListener {
+        binding.buttonCancel.setTextColor(MainApplication.themePrimaryColor)
+        binding.buttonOk.setTextColor(MainApplication.themePrimaryColor)
+
+        binding.buttonOk.setOnClickListener {
             folder?.run {
                 val name = binding.textInputEditText.text.toString()
+                val color = this@FolderEditingDialogFragment.color
 
                 if (name.isNotBlank()) {
                     folder?.let {
                         it.name = name
                         it.color = color
-
                         update(it)
-                        onFolderUpdatedListener?.onFolderUpdated(it, position)
                     }
                 } else {
                     binding.textInputLayout.isErrorEnabled = true
@@ -151,7 +143,7 @@ class FolderEditingDialogFragment: DialogFragment() {
             }
         }
 
-        binding.textViewCancel.setOnClickListener {
+        binding.buttonCancel.setOnClickListener {
             dismiss()
         }
 
@@ -177,7 +169,7 @@ class FolderEditingDialogFragment: DialogFragment() {
             }).setTitle(getString(R.string.select_folder_color_title))
                     .setColumns(6)
                     .setColorButtonMargin(2, 2, 2, 2)
-                    .setColorButtonDrawable(R.drawable.background_white_rounded_corners)
+                    .setColorButtonDrawable(R.drawable.rounded_corner)
                     .setColors(hexColors)
                     .setDefaultColorButton(color)
                     .show()
@@ -232,8 +224,10 @@ class FolderEditingDialogFragment: DialogFragment() {
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe({
-                        onFolderUpdatedListener?.onFolderUpdated(folder, position)
+                        Timber.d("Folder updated: $folder.")
+                        onFolderUpdatedListener?.onFolderUpdated(folder)
                     }, { throwable ->
+                        Timber.e(throwable, "Folder update failed.")
                         onFolderUpdatedListener?.onError(throwable)
                     })
             }

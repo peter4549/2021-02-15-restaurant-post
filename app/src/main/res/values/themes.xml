@@ -12,6 +12,8 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+
+        <item name="chipStyle">@style/Widget.App.Chip</item>
     </style>
 
     <style name="Theme.Toolbar" parent="@style/ThemeOverlay.AppCompat.ActionBar">
@@ -23,5 +25,22 @@
     <style name="WindowAnimations">
         <item name="android:windowEnterAnimation">@anim/anim_fade_in</item>
         <item name="android:windowExitAnimation">@anim/anim_fade_out</item>
+    </style>
+
+    <style name="SearchView" parent="Widget.AppCompat.SearchView" >
+        <item name="android:textSize">@dimen/text_size_medium</item>
+    </style>
+
+    <style name="Widget.App.Chip" parent="Widget.MaterialComponents.Chip.Entry">
+        <item name="chipCornerRadius">8dp</item>
+        <item name="iconStartPadding">2dp</item>
+        <item name="checkedIconEnabled">false</item>
+        <item name="checkedIconVisible">false</item>
+        <item name="chipBackgroundColor">@color/chip_background</item>
+        <item name="closeIcon" tools:ignore="PrivateResource">
+            @drawable/ic_mtrl_chip_close_circle</item>
+        <item name="closeIconEnabled">true</item>
+        <item name="closeIconTint">@color/color_icon</item>
+        <item name="closeIconVisible">true</item>
     </style>
 </resources>
