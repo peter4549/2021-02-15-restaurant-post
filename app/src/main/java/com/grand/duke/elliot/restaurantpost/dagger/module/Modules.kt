@@ -62,20 +62,20 @@ class ApplicationModule {
 
     @Provides
     @Singleton
-    internal fun provideTagPostListDao(appDatabase: AppDatabase): TagPostListCrossRefDao {
-        return appDatabase.tagPostListCrossRefDao()
+    internal fun provideTagPostListDao(appDatabase: AppDatabase): PostTagCrossRefDao {
+        return appDatabase.postTagCrossRefDao()
     }
 
     @Provides
     @Singleton
     internal fun provideLocalRepository(
-        folderDao: FolderDao,
-        placeDao: PlaceDao,
-        postDao: PostDao,
-        tagDao: TagDao,
-        tagPostListCrossRefDao: TagPostListCrossRefDao
+            folderDao: FolderDao,
+            placeDao: PlaceDao,
+            postDao: PostDao,
+            tagDao: TagDao,
+            postTagCrossRefDao: PostTagCrossRefDao
     ): LocalRepository {
-        return LocalRepository(folderDao, placeDao, postDao, tagDao, tagPostListCrossRefDao)
+        return LocalRepository(folderDao, placeDao, postDao, tagDao, postTagCrossRefDao)
     }
 
     /*

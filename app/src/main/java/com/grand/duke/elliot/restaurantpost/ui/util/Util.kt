@@ -6,6 +6,7 @@ import android.text.Html
 import android.util.DisplayMetrics
 import android.widget.TextView
 import androidx.annotation.ColorInt
+import com.grand.duke.elliot.restaurantpost.persistence.data.Post
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -51,3 +52,5 @@ fun setTextWithSearchWordColorChange(
         @Suppress("DEPRECATION")
         textView.text = Html.fromHtml(htmlText)
 }
+
+fun Post?.isNotNull() = this != null

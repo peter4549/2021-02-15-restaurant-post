@@ -1,5 +1,6 @@
 package com.grand.duke.elliot.restaurantpost.persistence.dao
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.grand.duke.elliot.restaurantpost.persistence.data.Folder
 import com.grand.duke.elliot.restaurantpost.persistence.data.FolderWithPostList
@@ -20,4 +21,7 @@ interface FolderDao {
 
     @Update
     fun update(folder: Folder): Completable
+
+    @Query("SELECT * FROM folder WHERE folder_id = :id ")
+    suspend fun folder(id: Long): Folder
 }

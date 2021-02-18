@@ -4,6 +4,8 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.view.View
 
+fun View?.isNotNull() = this != null
+
 fun View.show() {
     visibility = View.VISIBLE
 }

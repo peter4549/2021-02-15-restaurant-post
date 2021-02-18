@@ -6,7 +6,7 @@ import androidx.room.TypeConverters
 import com.grand.duke.elliot.restaurantpost.persistence.dao.*
 import com.grand.duke.elliot.restaurantpost.persistence.data.*
 
-@Database (entities = [Folder::class, Place::class, Post::class, Tag::class, TagPostListCrossRef::class],
+@Database (entities = [Folder::class, Place::class, Post::class, Tag::class, PostTagCrossRef::class],
     version = 1, exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -15,10 +15,10 @@ abstract class AppDatabase: RoomDatabase() {
     abstract fun placeDao(): PlaceDao
     abstract fun postDao(): PostDao
     abstract fun tagDao(): TagDao
-    abstract fun tagPostListCrossRefDao(): TagPostListCrossRefDao
+    abstract fun postTagCrossRefDao(): PostTagCrossRefDao
 
     companion object {
         const val name = "com.grand.duke.elliot.restaurantpost.database" +
-                ".AppDatabase.name:debug.1.0.1"
+                ".app_database.name:debug.1.0.2"
     }
 }

@@ -28,9 +28,9 @@
 
     <dimen name="bottom_sheet_height">48dp</dimen>
 
-    <dimen name="search_list_item_image_width">48dp</dimen>
-    <dimen name="search_list_item_image_height">48dp</dimen>
+    <dimen name="search_list_item_image_width">40dp</dimen>
+    <dimen name="search_list_item_image_height">40dp</dimen>
 
-    <dimen name="simple_item_image_view_width">40dp</dimen>
-    <dimen name="simple_item_image_view_height">40dp</dimen>
+    <dimen name="simple_item_image_view_width">24dp</dimen>
+    <dimen name="simple_item_image_view_height">24dp</dimen>
 </resources>

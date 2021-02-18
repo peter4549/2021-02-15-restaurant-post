@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
+import androidx.room.Ignore
 import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCallbacks
 import com.github.ksoichiro.android.observablescrollview.ScrollState
 import com.github.ksoichiro.android.observablescrollview.ScrollUtils
@@ -23,11 +24,15 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.chip.Chip
 import com.grand.duke.elliot.restaurantpost.R
 import com.grand.duke.elliot.restaurantpost.application.MainApplication
+import com.grand.duke.elliot.restaurantpost.application.noFolderSelected
 import com.grand.duke.elliot.restaurantpost.databinding.ActivityWritingBinding
 import com.grand.duke.elliot.restaurantpost.persistence.dao.FolderDao
+import com.grand.duke.elliot.restaurantpost.persistence.dao.PostDao
+import com.grand.duke.elliot.restaurantpost.persistence.dao.PostTagCrossRefDao
 import com.grand.duke.elliot.restaurantpost.persistence.dao.TagDao
 import com.grand.duke.elliot.restaurantpost.persistence.data.Folder
 import com.grand.duke.elliot.restaurantpost.persistence.data.Place
+import com.grand.duke.elliot.restaurantpost.persistence.data.Post
 import com.grand.duke.elliot.restaurantpost.persistence.data.Tag
 import com.grand.duke.elliot.restaurantpost.repository.data.DisplayFolder
 import com.grand.duke.elliot.restaurantpost.repository.data.DisplayTag
@@ -67,6 +72,12 @@ class WritingActivity: AppCompatActivity(),
     lateinit var folderDao: FolderDao
 
     @Inject
+    lateinit var postDao: PostDao
+
+    @Inject
+    lateinit var postTagCrossRefDao: PostTagCrossRefDao
+
+    @Inject
     lateinit var tagDao: TagDao
 
     private lateinit var viewModel: WritingViewModel
@@ -90,6 +101,8 @@ class WritingActivity: AppCompatActivity(),
 
     private var lastPlaceInitialized = false
 
+    private var chipFolder: Chip? = null
+
     object SimpleItemId {
         const val ImageCapture = "com.grand.duke.elliot.restaurantpost.ui.post" +
                 ".simple_item_id.image_capture"
@@ -102,7 +115,7 @@ class WritingActivity: AppCompatActivity(),
 
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_writing)
-        viewModel = viewModelFactory.create(null, folderDao, tagDao)
+        viewModel = viewModelFactory.create(null, folderDao, tagDao, postDao, postTagCrossRefDao)
         init()
     }
 
@@ -139,7 +152,7 @@ class WritingActivity: AppCompatActivity(),
     }
 
     private fun initLiveData() {
-        viewModel.photoUris.observe(this, { photoUris ->
+        viewModel.photoUriList.observe(this, { photoUris ->
             if (this::photoUriAdapter.isInitialized.not())
                 uiController.initViewPager()
 
@@ -158,6 +171,79 @@ class WritingActivity: AppCompatActivity(),
 
             photoUriAdapter.submitList(photoUris)
             photoUriAdapter.notifyDataSetChanged()
+        })
+
+        viewModel.folder.observe(this, { folder ->
+            folder?.let {
+                if (chipFolder.isNotNull()) {
+                    chipFolder?.text = folder.name
+                    chipFolder?.invalidate()
+                } else {
+                    chipFolder = Chip(this)
+                    chipFolder?.text = folder.name
+                    chipFolder?.chipIcon = ContextCompat.getDrawable(this, R.drawable.ic_round_folder_24)
+                    chipFolder?.chipIconSize = convertDpToPx(this, 24F)
+
+                    chipFolder?.setChipIconTintResource(R.color.color_icon)
+                    chipFolder?.setOnCloseIconClickListener {
+                        viewModel.setFolder(null)
+                    }
+
+                    binding.chipGroup.addView(chipFolder, 0)
+                }
+            } ?: run {
+                if (chipFolder.isNotNull()) {
+                    binding.chipGroup.removeView(chipFolder)
+                    chipFolder = null
+                }
+            }
+        })
+
+        viewModel.displayTagList.observe(this, { displayTagList ->
+            displayTagList ?: return@observe
+            val changedTag = displayTagList.changedTag
+            val changeType = displayTagList.changeType
+            val tagList = displayTagList.tagList
+
+            when(changeType) {
+                DisplayTagList.ChangeType.Initialized -> {
+                    for (tag in tagList) {
+                        val chip = Chip(this).apply {
+                            this.tag = tag.id
+                        }
+                        chip.text = tag.name
+                        chip.setOnCloseIconClickListener {
+                            binding.chipGroup.removeView(it)
+                            viewModel.removeTag(tag)
+                        }
+
+                        binding.chipGroup.addView(chip)
+                    }
+                }
+                DisplayTagList.ChangeType.Add -> {
+                    val tag = changedTag ?: return@observe
+                    val chip = Chip(this).apply {
+                        this.tag = tag.id
+                        text = tag.name
+                        setOnCloseIconClickListener {
+                            binding.chipGroup.removeView(it)
+                            viewModel.removeTag(tag)
+                        }
+                    }
+                    binding.chipGroup.addView(chip)
+                }
+                DisplayTagList.ChangeType.Remove -> {
+                    val tag = changedTag ?: return@observe
+                    val chip = binding.chipGroup.findViewWithTag<Chip>(tag.id) ?: return@observe
+                    binding.chipGroup.removeView(chip)
+                }
+                DisplayTagList.ChangeType.Update -> {
+                    val tag = changedTag ?: return@observe
+                    val chip = binding.chipGroup.findViewWithTag<Chip>(tag.id) ?: return@observe
+                    chip.text = tag.name
+                    chip.invalidate()
+                }
+            }
         })
     }
 
@@ -380,7 +466,6 @@ class WritingActivity: AppCompatActivity(),
             val display = windowManager.defaultDisplay
             @Suppress("DEPRECATION")
             display.getMetrics(displayMetrics)
-
             return displayMetrics.heightPixels
         }
     }
@@ -400,40 +485,53 @@ class WritingActivity: AppCompatActivity(),
         googleMap?.moveCamera(cameraUpdate)
     }
 
-    private fun addFolderChip(folder: Folder) {
-        viewModel.folder?.let {
-            val chip = binding.chipGroup.getChildAt(0) as? Chip
-            chip?.text = folder.name
-            chip?.invalidate()
-        } ?: run {
-            val chip = Chip(this)
-            chip.text = folder.name
-            chip.chipIcon = ContextCompat.getDrawable(this, R.drawable.ic_round_folder_24)
-            chip.chipIconSize = convertDpToPx(this, 20F)
+    private fun isChanged(): Boolean {
+        viewModel.post()?.let {
+            if (viewModel.existingPhotoUriArray().contentEquals(viewModel.photoUriList()?.toTypedArray()).not())
+                return true
 
-            chip.setChipIconTintResource(R.color.color_icon)
-            chip.setOnCloseIconClickListener {
-                binding.chipGroup.removeView(it)
-                viewModel.folder = null
-            }
+            if (it.description != binding.editTextDescription.text.toString())
+                return true
 
-            binding.chipGroup.addView(chip, 0)
-        }
+            if (it.folderId != viewModel.folder()?.id)
+                return true
 
-        viewModel.folder = folder
+            if (it.place?.id != viewModel.place.value?.id)
+                return true
+
+            if (viewModel.existingTagArray().contentEquals(viewModel.tagList().toTypedArray()).not())
+                return true
+
+            return false
+        } ?: return false
     }
 
-    private fun addTagChip(tag: Tag) {
-        if (viewModel.tags().contains(tag).not()) {
-            val chip = Chip(this)
-            chip.text = tag.name
-            chip.setOnCloseIconClickListener {
-                binding.chipGroup.removeView(it)
-                viewModel.removeTag(tag)
-            }
+    private fun createPost(): Post {
+        return Post(
+                description = binding.editTextDescription.text.toString(),
+                folderId = noFolderSelected,
+                modifiedTime = viewModel.modifiedTime,
+                photoUris = viewModel.photoUriList()?.toTypedArray() ?: arrayOf(),
+                place = viewModel.place()
+        )
+    }
 
-            viewModel.addTag(tag)
-            binding.chipGroup.addView(chip)
+    private fun savePost() {
+        val post = createPost()
+        viewModel.insertPost(post)
+
+    }
+
+    private fun updatePost() {
+
+    }
+
+    override fun onBackPressed() {
+        when(viewModel.mode()) {
+            WritingViewModel.Mode.Creation -> savePost()
+            WritingViewModel.Mode.Edit -> {
+
+            }
         }
     }
 
@@ -489,10 +587,10 @@ class WritingActivity: AppCompatActivity(),
                 override fun onItemClick(item: T, adapterPosition: Int) {
                     when(item) {
                         is DisplayFolder -> {
-                            addFolderChip(item.folder)
+                            viewModel.setFolder(item.folder)
                         }
                         is DisplayTag -> {
-                            addTagChip(item.tag)
+                            viewModel.addTag(item.tag)
                         }
                     }
                 }
@@ -526,11 +624,11 @@ class WritingActivity: AppCompatActivity(),
     override fun onRequestOnFolderUpdatedListener(): FolderEditingDialogFragment.OnFolderUpdatedListener =
             object: FolderEditingDialogFragment.OnFolderUpdatedListener {
                 override fun onFolderUpdated(folder: Folder) {
-
+                    viewModel.setFolder(folder)
                 }
 
                 override fun onError(throwable: Throwable) {
-
+                    Timber.e(throwable, "Folder update failed.")
                 }
             }
 
@@ -538,11 +636,11 @@ class WritingActivity: AppCompatActivity(),
     override fun onRequestOnTagUpdatedListener(): TagEditingDialogFragment.OnTagUpdatedListener =
             object: TagEditingDialogFragment.OnTagUpdatedListener {
                 override fun onTagUpdated(tag: Tag) {
-
+                    viewModel.updateTag(tag)
                 }
 
                 override fun onError(throwable: Throwable) {
-
+                    Timber.e(throwable, "Tag update failed.")
                 }
             }
 

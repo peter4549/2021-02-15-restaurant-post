@@ -12,7 +12,7 @@ data class TagWithPostList(
             entity = Post::class,
             entityColumn = "post_id",
             associateBy = Junction(
-                    value = TagPostListCrossRef::class,
+                    value = PostTagCrossRef::class,
                     parentColumn = "tag_id",
                     entityColumn = "post_id"
             )
