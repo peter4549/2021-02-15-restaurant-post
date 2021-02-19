@@ -3,7 +3,6 @@ package com.grand.duke.elliot.restaurantpost.dagger.component
 import android.app.Application
 import com.grand.duke.elliot.restaurantpost.application.MainApplication
 import com.grand.duke.elliot.restaurantpost.dagger.module.*
-import com.grand.duke.elliot.restaurantpost.ui.post.WritingActivity
 import dagger.BindsInstance
 import dagger.Component
 import dagger.android.AndroidInjectionModule

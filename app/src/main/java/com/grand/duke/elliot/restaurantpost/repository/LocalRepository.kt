@@ -7,11 +7,11 @@ import io.reactivex.Flowable
 import javax.inject.Inject
 
 class LocalRepository @Inject constructor(
-    private val folderDao: FolderDao,
-    private val placeDao: PlaceDao,
-    private val postDao: PostDao,
-    private val tagDao: TagDao,
-    private val postTagCrossRefDao: PostTagCrossRefDao
+        val folderDao: FolderDao,
+        val placeDao: PlaceDao,
+        val postDao: PostDao,
+        val tagDao: TagDao,
+        val postTagCrossRefDao: PostTagCrossRefDao
 ) {
     @Suppress("SpellCheckingInspection")
     private val folderWithPostListFlowable: Flowable<List<FolderWithPostList>> by lazy {

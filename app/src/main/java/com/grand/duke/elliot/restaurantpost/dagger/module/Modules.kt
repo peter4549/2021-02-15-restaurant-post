@@ -13,12 +13,15 @@ import com.grand.duke.elliot.restaurantpost.repository.LocalRepository
 import com.grand.duke.elliot.restaurantpost.ui.ViewModelFactory
 import com.grand.duke.elliot.restaurantpost.ui.folder.DisplayFolderListDialogFragment
 import com.grand.duke.elliot.restaurantpost.ui.folder.FolderEditingDialogFragment
-import com.grand.duke.elliot.restaurantpost.ui.post.WritingActivity
+import com.grand.duke.elliot.restaurantpost.ui.post.list.PostListFragment
+import com.grand.duke.elliot.restaurantpost.ui.post.list.PostListViewModel
+import com.grand.duke.elliot.restaurantpost.ui.post.writing.WritingActivity
 import com.grand.duke.elliot.restaurantpost.ui.tag.DisplayTagListDialogFragment
 import com.grand.duke.elliot.restaurantpost.ui.tag.TagEditingDialogFragment
 import com.squareup.inject.assisted.dagger2.AssistedModule
 import dagger.*
 import dagger.android.ContributesAndroidInjector
+import dagger.multibindings.IntoMap
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 
@@ -113,6 +116,10 @@ abstract class FragmentBindingModule {
     @FragmentScope
     @ContributesAndroidInjector
     abstract fun tagEditingDialogFragment(): TagEditingDialogFragment
+
+    @FragmentScope
+    @ContributesAndroidInjector
+    abstract fun postListFragment(): PostListFragment
 }
 
 @Module abstract class ViewModelFactoryModule {
@@ -127,7 +134,13 @@ abstract class ViewModelModule {
     @IntoMap
     @ViewModelKey(WritingViewModel::class)
     internal abstract fun bindWritingViewModel(writingViewModel: WritingViewModel): ViewModel
+
      */
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(PostListViewModel::class)
+    internal abstract fun bindPostListViewModel(postListViewModel: PostListViewModel): ViewModel
 }
 
 @AssistedModule

@@ -1,39 +1,36 @@
-package com.grand.duke.elliot.restaurantpost.ui.post
+package com.grand.duke.elliot.restaurantpost.ui.post.writing
 
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.grand.duke.elliot.restaurantpost.persistence.dao.FolderDao
-import com.grand.duke.elliot.restaurantpost.persistence.dao.PostDao
-import com.grand.duke.elliot.restaurantpost.persistence.dao.PostTagCrossRefDao
-import com.grand.duke.elliot.restaurantpost.persistence.dao.TagDao
 import com.grand.duke.elliot.restaurantpost.persistence.data.*
+import com.grand.duke.elliot.restaurantpost.repository.LocalRepository
+import com.grand.duke.elliot.restaurantpost.ui.util.difference
 import com.grand.duke.elliot.restaurantpost.ui.util.isNotNull
 import com.squareup.inject.assisted.Assisted
 import com.squareup.inject.assisted.AssistedInject
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class WritingViewModel @AssistedInject constructor(
         @Assisted private val post: Post?,
-        @Assisted private val folderDao: FolderDao,
-        @Assisted private val tagDao: TagDao,
-        @Assisted private val postDao: PostDao,
-        @Assisted private val postTagCrossRefDao: PostTagCrossRefDao
+        @Assisted private val localRepository: LocalRepository
 ): ViewModel() {
+
+    private val folderDao = localRepository.folderDao
+    private val postDao = localRepository.postDao
+    private val postTagCrossRefDao = localRepository.postTagCrossRefDao
+    private val tagDao = localRepository.tagDao
 
     @AssistedInject.Factory
     interface Factory {
-        fun create(post: Post?,
-                   folderDao: FolderDao,
-                   tagDao: TagDao,
-                   postDao: PostDao,
-                   postTagCrossRefDao: PostTagCrossRefDao
-        ): WritingViewModel
+        fun create(post: Post?, localRepository: LocalRepository): WritingViewModel
     }
 
     private val compositeDisposable by lazy {
@@ -78,24 +75,24 @@ class WritingViewModel @AssistedInject constructor(
 
     fun place() = _place.value
 
-    private val _photoUriList = MutableLiveData<MutableList<Uri>>(mutableListOf())
-    val photoUriList: LiveData<MutableList<Uri>>
-        get() = _photoUriList
+    private val _photoUriStringList = MutableLiveData<MutableList<String>>(mutableListOf())
+    val photoUriStringList: LiveData<MutableList<String>>
+        get() = _photoUriStringList
 
-    private val existingPhotoUriArray: Array<Uri>
+    private val existingPhotoUriStringArray: Array<String>
 
-    fun existingPhotoUriArray() = existingPhotoUriArray
-    fun photoUriList() = _photoUriList.value
+    fun existingPhotoUriArray() = existingPhotoUriStringArray
+    fun photoUriList() = _photoUriStringList.value ?: listOf()
 
     init {
-        val photoUriList = mutableListOf<Uri>()
+        val photoUriStringList = mutableListOf<String>()
 
-        post?.photoUris?.forEach { uri ->
-            photoUriList.add(uri)
+        post?.photoUriStringArray?.forEach {
+            photoUriStringList.add(it)
         }
 
-        existingPhotoUriArray = photoUriList.map { it }.toTypedArray()
-        _photoUriList.value = photoUriList
+        existingPhotoUriStringArray = photoUriStringList.map { it }.toTypedArray()
+        _photoUriStringList.value = photoUriStringList
     }
 
 
@@ -172,9 +169,9 @@ class WritingViewModel @AssistedInject constructor(
     }
 
     fun addPhotoUri(uri: Uri) {
-        val value = photoUriList.value
-        value?.add(uri)
-        _photoUriList.value = value
+        val value = photoUriStringList.value
+        value?.add(uri.toString())
+        _photoUriStringList.value = value
     }
 
     fun setPlace(place: Place) {
@@ -215,11 +212,49 @@ class WritingViewModel @AssistedInject constructor(
         })
     }
 
-    fun insertPost(post: Post) {
+    fun insertPost(post: Post, onComplete: (Throwable?) -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 postDao.insert(post)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe({
+                            onComplete(null)
+                        }, {
+                            onComplete(it)
+                        })
                 insertTagList(post)
+            }
+        }
+    }
+
+    fun updatePost(post: Post, onComplete: (Throwable?) -> Unit) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                postDao.update(post)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe({
+                            onComplete(null)
+                        }, {
+                            onComplete(it)
+                        })
+
+                val difference = existingTagArray().toList().difference(tagList())
+
+                postTagCrossRefDao.deleteAll(difference.first.map {
+                    PostTagCrossRef(
+                            postId = post.id,
+                            tagId = it.id
+                    )
+                })
+
+                postTagCrossRefDao.insertAll(difference.second.map {
+                    PostTagCrossRef(
+                        postId = post.id,
+                        tagId = it.id
+                    )
+                })
             }
         }
     }

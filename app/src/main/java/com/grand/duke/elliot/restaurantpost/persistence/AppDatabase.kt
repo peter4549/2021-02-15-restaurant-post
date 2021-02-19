@@ -19,6 +19,6 @@ abstract class AppDatabase: RoomDatabase() {
 
     companion object {
         const val name = "com.grand.duke.elliot.restaurantpost.database" +
-                ".app_database.name:debug.1.0.2"
+                ".app_database.name:debug.1.0.4"
     }
 }

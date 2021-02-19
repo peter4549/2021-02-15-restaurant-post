@@ -13,7 +13,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.grand.duke.elliot.restaurantpost.R
 import kotlinx.android.synthetic.main.item_view_pager.view.*
 
-class PhotoUriAdapter: ListAdapter<Uri, PhotoUriAdapter.ViewHolder>(PhotoUriDiffCallback()) {
+class PhotoUriStringAdapter: ListAdapter<String, PhotoUriStringAdapter.ViewHolder>(PhotoUriDiffCallback()) {
 
     private var onItemClickListener: OnItemClickListener? = null
 
@@ -22,13 +22,13 @@ class PhotoUriAdapter: ListAdapter<Uri, PhotoUriAdapter.ViewHolder>(PhotoUriDiff
     }
 
     interface OnItemClickListener {
-        fun onClick(uri: Uri)
+        fun onClick(uriString: String)
     }
 
     inner class ViewHolder(val view: View): RecyclerView.ViewHolder(view) {
-        fun bind(uri: Uri) {
+        fun bind(uriString: String) {
             Glide.with(view.context)
-                .load(uri)
+                .load(uriString)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .skipMemoryCache(true)
                 .error(R.drawable.ic_round_error_24)
@@ -36,7 +36,7 @@ class PhotoUriAdapter: ListAdapter<Uri, PhotoUriAdapter.ViewHolder>(PhotoUriDiff
                 .into(view.image_view)
 
             view.setOnClickListener {
-                onItemClickListener?.onClick(uri)
+                onItemClickListener?.onClick(uriString)
             }
         }
     }

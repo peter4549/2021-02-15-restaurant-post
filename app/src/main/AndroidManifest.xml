@@ -27,7 +27,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.post.WritingActivity" />
+        <activity android:name=".ui.post.writing.WritingActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

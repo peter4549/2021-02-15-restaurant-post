@@ -14,6 +14,9 @@ interface PostTagCrossRefDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(postTagCrossRefList: List<PostTagCrossRef>)
 
+    @Delete
+    suspend fun deleteAll(postTagCrossRefList: List<PostTagCrossRef>)
+
     @Transaction
     @Query("SELECT * FROM tag ORDER BY name ASC")
     fun getTagWithPostLists(): Flowable<List<TagWithPostList>>

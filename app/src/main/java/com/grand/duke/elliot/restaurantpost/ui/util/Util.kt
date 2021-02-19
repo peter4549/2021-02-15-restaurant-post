@@ -54,3 +54,6 @@ fun setTextWithSearchWordColorChange(
 }
 
 fun Post?.isNotNull() = this != null
+
+fun <T> List<T>.difference(list: List<T>) =
+        this.filterNot { list.contains(it) } to list.filterNot { this.contains(it) }

@@ -188,7 +188,7 @@
                             android:name="com.google.android.gms.maps.SupportMapFragment"
                             android:layout_width="match_parent"
                             android:layout_height="224dp"
-                            tools:context=".ui.post.WritingActivity"
+                            tools:context=".ui.post.writing.WritingActivity"
                             tools:ignore="FragmentTagUsage" />
                     </LinearLayout>
 

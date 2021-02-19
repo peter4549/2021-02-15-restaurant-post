@@ -2,18 +2,28 @@
     <string name="app_name">RestaurantPost</string>
     <string name="file_provider_authorities">com.grand.duke.elliot.restaurantpost.fileprovider</string>
 
+    <string name="calendar">달력</string>
     <string name="cancel">취소</string>
     <string name="delete">삭제</string>
+    <string name="do_not_save">저장 안 함</string>
     <string name="edit">편집</string>
     <string name="ok">확인</string>
+    <string name="post">포스트</string>
+    <string name="save">저장</string>
 
     <!-- Place. -->
     <string name="default_place_name">서울특별시</string>
 
     <!-- WritingActivity. -->
+    <string name="change_confirmation_dialog_title">변경사항 저장</string>
+    <string name="change_confirmation_dialog_message">변경사항을 저장하시겠습니까?</string>
     <string name="edit_text_description_hint">여기에 입력하세요.</string>
+    <string name="failed_to_save_post">포스트를 저장하지 못했습니다.</string>
     <string name="photo">사진</string>
     <string name="photo_shoot">사진 촬영</string>
+    <string name="post_update_failed">포스트를 업데이트하지 못했습니다.</string>
+    <string name="save_confirmation_dialog_title">포스트 저장</string>
+    <string name="save_confirmation_dialog_message">포스트를 저장하시겠습니까?</string>
     <string name="select_from_album">앨범에서 선택</string>
     <string name="tag">태그</string>
 

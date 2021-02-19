@@ -20,10 +20,4 @@ class Converters {
 
     @TypeConverter
     fun jsonToPlace(value: String): Place = gson.fromJson(value, Place::class.java)
-
-    @TypeConverter
-    fun uriArrayToJson(value: Array<Uri>): String = gson.toJson(value)
-
-    @TypeConverter
-    fun jsonToUriArray(value: String): Array<Uri> = gson.fromJson(value, Array<Uri>::class.java)
 }
