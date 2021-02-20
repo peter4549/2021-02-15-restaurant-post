@@ -2,7 +2,7 @@ package com.grand.duke.elliot.restaurantpost.ui.folder
 
 import android.view.View
 import com.grand.duke.elliot.restaurantpost.repository.data.DisplayFolder
-import com.grand.duke.elliot.restaurantpost.ui.util.dialog_fragment.AdapterItem
+import com.grand.duke.elliot.restaurantpost.ui.util.dialog_fragment.SearchBarListItem
 import com.grand.duke.elliot.restaurantpost.ui.util.dialog_fragment.SearchBarListAdapter
 import com.grand.duke.elliot.restaurantpost.ui.util.setTextWithSearchWordColorChange
 
@@ -10,8 +10,9 @@ class DisplayFolderListAdapter : SearchBarListAdapter<DisplayFolder>() {
 
     override fun deepCopy(item: DisplayFolder): DisplayFolder = item.deepCopy()
 
-    override fun bind(viewHolder: ViewHolder, adapterItem: AdapterItem<DisplayFolder>) {
-        val displayFolder = adapterItem.item
+    override fun bind(viewHolder: ViewHolder, searchBarListItem: SearchBarListItem<DisplayFolder>) {
+        val displayFolder = searchBarListItem.item
+        viewHolder.binding.appCompatCheckBox.visibility = View.GONE
         viewHolder.binding.imageView.visibility = View.GONE
         viewHolder.binding.imageViewMore.visibility = View.VISIBLE
         viewHolder.binding.textViewCount.visibility = View.VISIBLE
@@ -27,17 +28,17 @@ class DisplayFolderListAdapter : SearchBarListAdapter<DisplayFolder>() {
         viewHolder.binding.viewColorBar.setBackgroundColor(displayFolder.folder.color)
 
         viewHolder.binding.imageViewMore.setOnClickListener {
-            showPopupMenu(it, displayFolder, viewHolder.adapterPosition)
+            showPopupMenu(it, displayFolder, viewHolder.absoluteAdapterPosition)
         }
 
         viewHolder.binding.root.setOnClickListener {
-            onItemClickListener?.onItemClick(adapterItem.item, viewHolder.adapterPosition)
+            onItemClickListener?.onItemClick(searchBarListItem.item, viewHolder.absoluteAdapterPosition)
         }
     }
 
-    override fun filter(adapterItem: AdapterItem<DisplayFolder>, searchWord: String): AdapterItem<DisplayFolder>? {
-        if (adapterItem.item.folder.name.contains(searchWord))
-            return adapterItem
+    override fun filter(searchBarListItem: SearchBarListItem<DisplayFolder>, searchWord: String): SearchBarListItem<DisplayFolder>? {
+        if (searchBarListItem.item.folder.name.contains(searchWord))
+            return searchBarListItem
 
         return null
     }

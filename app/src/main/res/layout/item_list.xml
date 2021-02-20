@@ -22,12 +22,23 @@
                 android:id="@+id/image_view"
                 android:layout_width="@dimen/search_list_item_image_width"
                 android:layout_height="@dimen/search_list_item_image_height"
-                android:layout_marginBottom="@dimen/spacing_small"
+                android:layout_marginBottom="@dimen/spacing_small_large"
                 android:layout_marginStart="@dimen/spacing_medium"
-                android:layout_marginTop="@dimen/spacing_small"
+                android:layout_marginTop="@dimen/spacing_small_large"
                 android:visibility="gone"
                 tools:srcCompat="@tools:sample/backgrounds/scenic"
                 tools:ignore="ContentDescription" />
+
+            <androidx.appcompat.widget.AppCompatCheckBox
+                android:id="@+id/app_compat_check_box"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:button="@null"
+                android:background="?android:attr/listChoiceIndicatorMultiple"
+                android:visibility="gone"
+                android:layout_marginBottom="@dimen/spacing_small_large"
+                android:layout_marginStart="@dimen/spacing_medium"
+                android:layout_marginTop="@dimen/spacing_small_large"/>
 
             <View
                 android:id="@+id/view_color_bar"

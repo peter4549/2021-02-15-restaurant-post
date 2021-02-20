@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_layout_calendar_day"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/text_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/spacing_extra_small"
+        android:gravity="center_horizontal|top"
+        android:paddingTop="2dp"
+        android:textColor="@color/white"
+        android:textSize="@dimen/text_size_medium_large"
+        tools:background="@color/surface"
+        tools:text="22" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

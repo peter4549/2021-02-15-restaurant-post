@@ -12,10 +12,10 @@ import com.grand.duke.elliot.restaurantpost.R
 import com.grand.duke.elliot.restaurantpost.databinding.ItemListBinding
 import com.grand.duke.elliot.restaurantpost.ui.util.blank
 
-abstract class SearchBarListAdapter<T>: ListAdapter<AdapterItem<T>, SearchBarListAdapter.ViewHolder>(DiffCallback<T>()) {
+abstract class SearchBarListAdapter<T>: ListAdapter<SearchBarListItem<T>, SearchBarListAdapter.ViewHolder>(DiffCallback<T>()) {
 
     protected abstract fun deepCopy(item: T): T
-    private val adapterItemList = arrayListOf<AdapterItem<T>>()
+    private val adapterItemList = arrayListOf<SearchBarListItem<T>>()
 
     protected lateinit var recyclerView: RecyclerView
 
@@ -36,7 +36,7 @@ abstract class SearchBarListAdapter<T>: ListAdapter<AdapterItem<T>, SearchBarLis
         adapterItemList.clear()
 
         for ((index, item) in itemList.withIndex())
-            adapterItemList.add(AdapterItem(index.toLong(), item))
+            adapterItemList.add(SearchBarListItem(index.toLong(), item))
 
         submitList(ArrayList(adapterItemList))
     }
@@ -46,7 +46,7 @@ abstract class SearchBarListAdapter<T>: ListAdapter<AdapterItem<T>, SearchBarLis
 
     class ViewHolder(val binding: ItemListBinding): RecyclerView.ViewHolder(binding.root)
 
-    protected abstract fun bind(viewHolder: ViewHolder, adapterItem: AdapterItem<T>)
+    protected abstract fun bind(viewHolder: ViewHolder, searchBarListItem: SearchBarListItem<T>)
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -67,23 +67,23 @@ abstract class SearchBarListAdapter<T>: ListAdapter<AdapterItem<T>, SearchBarLis
         bind(holder, getItem(position))
     }
 
-    protected abstract fun filter(adapterItem: AdapterItem<T>, searchWord: String): AdapterItem<T>?
+    protected abstract fun filter(searchBarListItem: SearchBarListItem<T>, searchWord: String): SearchBarListItem<T>?
 
     fun getFilter(): Filter {
-        var adapterItemListFiltered: ArrayList<AdapterItem<T>>
+        var searchBarListItemListFiltered: ArrayList<SearchBarListItem<T>>
 
         return object : Filter() {
             override fun performFiltering(charSequence: CharSequence?): FilterResults {
                 searchWord = charSequence.toString()
-                val adapterItemListBeingFiltered = arrayListOf<AdapterItem<T>>()
+                val adapterItemListBeingFiltered = arrayListOf<SearchBarListItem<T>>()
 
-                adapterItemListFiltered =
+                searchBarListItemListFiltered =
                     if (searchWord.isBlank())
                         adapterItemList
                     else {
                         for (item in adapterItemList)
                             filter(item, searchWord)?.also {
-                                val adapterItem = AdapterItem(
+                                val adapterItem = SearchBarListItem(
                                     it.id,
                                     deepCopy(it.item)
                                 )
@@ -94,14 +94,14 @@ abstract class SearchBarListAdapter<T>: ListAdapter<AdapterItem<T>, SearchBarLis
                     }
 
                 return FilterResults().apply {
-                    values = adapterItemListFiltered
+                    values = searchBarListItemListFiltered
                 }
             }
 
             override fun publishResults(charSequence: CharSequence?, results: FilterResults?) {
                 @Suppress("UNCHECKED_CAST")
                 results?.values?.also {
-                    submitList(results.values as List<AdapterItem<T>>)
+                    submitList(results.values as List<SearchBarListItem<T>>)
 
                     if (searchWord.isBlank())
                         notifyDataSetChanged()
@@ -137,17 +137,17 @@ abstract class SearchBarListAdapter<T>: ListAdapter<AdapterItem<T>, SearchBarLis
     }
 }
 
-class DiffCallback<T>: DiffUtil.ItemCallback<AdapterItem<T>>() {
-    override fun areItemsTheSame(oldItem: AdapterItem<T>, newItem: AdapterItem<T>): Boolean {
+class DiffCallback<T>: DiffUtil.ItemCallback<SearchBarListItem<T>>() {
+    override fun areItemsTheSame(oldItem: SearchBarListItem<T>, newItem: SearchBarListItem<T>): Boolean {
         return oldItem.id == newItem.id
     }
 
-    override fun areContentsTheSame(oldItem: AdapterItem<T>, newItem: AdapterItem<T>): Boolean {
+    override fun areContentsTheSame(oldItem: SearchBarListItem<T>, newItem: SearchBarListItem<T>): Boolean {
         return oldItem == newItem
     }
 }
 
-data class AdapterItem<T>(
+data class SearchBarListItem<T>(
     val id: Long,
     val item: T
 )

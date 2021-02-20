@@ -529,9 +529,6 @@ class WritingActivity: AppCompatActivity(),
                 if (viewModel.folder() != null)
                     return true
 
-                if (viewModel.place() != null)
-                    return true
-
                 if (viewModel.tagList().isNotEmpty())
                     return true
 
@@ -548,7 +545,7 @@ class WritingActivity: AppCompatActivity(),
                     if (it.folderId != viewModel.folder()?.id)
                         return true
 
-                    if (it.place?.id != viewModel.place()?.id)
+                    if (viewModel.existingPlace() != viewModel.place())
                         return true
 
                     if (viewModel.existingTagArray().contentEquals(viewModel.tagList().toTypedArray()).not())
@@ -564,7 +561,7 @@ class WritingActivity: AppCompatActivity(),
     private fun createPost(): Post {
         return Post(
                 description = binding.editTextDescription.text.toString(),
-                folderId = noFolderSelected,
+                folderId = viewModel.folder()?.id ?: noFolderSelected,
                 modifiedTime = viewModel.modifiedTime,
                 photoUriStringArray = viewModel.photoUriList().toTypedArray(),
                 place = viewModel.place()

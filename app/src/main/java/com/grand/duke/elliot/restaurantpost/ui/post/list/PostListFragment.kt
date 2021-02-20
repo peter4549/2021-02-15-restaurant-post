@@ -8,13 +8,19 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.grand.duke.elliot.restaurantpost.R
 import com.grand.duke.elliot.restaurantpost.base.BaseFragment
 import com.grand.duke.elliot.restaurantpost.databinding.FragmentPostListBinding
+import com.grand.duke.elliot.restaurantpost.ui.home.MainViewModel
+import io.reactivex.disposables.CompositeDisposable
 
-class PostListFragment: BaseFragment<PostListViewModel, FragmentPostListBinding>() {
+class PostListFragment: BaseFragment<MainViewModel, FragmentPostListBinding>() {
+
+    private val compositeDisposable by lazy {
+        CompositeDisposable()
+    }
 
     override val layoutRes: Int
         get() = R.layout.fragment_post_list
 
-    override fun viewModel(): Class<PostListViewModel> = PostListViewModel::class.java
+    override fun viewModel(): Class<MainViewModel> = MainViewModel::class.java
 
     private val postAdapter = PostAdapter()
 
@@ -31,9 +37,13 @@ class PostListFragment: BaseFragment<PostListViewModel, FragmentPostListBinding>
 
         viewModel.postList().observe(viewLifecycleOwner, {
             postAdapter.submitDataList(it)
-            showToast(it.toString())
         })
 
         return view
+    }
+
+    override fun onDestroyView() {
+        compositeDisposable.clear()
+        super.onDestroyView()
     }
 }

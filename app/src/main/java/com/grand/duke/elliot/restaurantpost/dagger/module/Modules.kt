@@ -2,6 +2,7 @@ package com.grand.duke.elliot.restaurantpost.dagger.module
 
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
@@ -11,10 +12,14 @@ import com.grand.duke.elliot.restaurantpost.persistence.AppDatabase
 import com.grand.duke.elliot.restaurantpost.persistence.dao.*
 import com.grand.duke.elliot.restaurantpost.repository.LocalRepository
 import com.grand.duke.elliot.restaurantpost.ui.ViewModelFactory
+import com.grand.duke.elliot.restaurantpost.ui.calendar.CalendarFragment
+import com.grand.duke.elliot.restaurantpost.ui.calendar.CalendarViewModel
 import com.grand.duke.elliot.restaurantpost.ui.folder.DisplayFolderListDialogFragment
 import com.grand.duke.elliot.restaurantpost.ui.folder.FolderEditingDialogFragment
+import com.grand.duke.elliot.restaurantpost.ui.home.MainActivity
+import com.grand.duke.elliot.restaurantpost.ui.home.MainViewModel
+import com.grand.duke.elliot.restaurantpost.ui.home.TabFragment
 import com.grand.duke.elliot.restaurantpost.ui.post.list.PostListFragment
-import com.grand.duke.elliot.restaurantpost.ui.post.list.PostListViewModel
 import com.grand.duke.elliot.restaurantpost.ui.post.writing.WritingActivity
 import com.grand.duke.elliot.restaurantpost.ui.tag.DisplayTagListDialogFragment
 import com.grand.duke.elliot.restaurantpost.ui.tag.TagEditingDialogFragment
@@ -81,22 +86,19 @@ class ApplicationModule {
         return LocalRepository(folderDao, placeDao, postDao, tagDao, postTagCrossRefDao)
     }
 
-    /*
+
     @Provides
     @Singleton
     internal fun provideSharedPreferences(sharedPreferences: SharedPreferences): SharedPreferences {
         return sharedPreferences
     }
-     */
 }
 
 @Module
 abstract class ActivityBindingModule {
-    /*
     @ActivityScope
     @ContributesAndroidInjector
-    abstract fun writingActivity(): WritingActivity
-     */
+    abstract fun mainActivity(): MainActivity
 }
 
 @Module
@@ -120,6 +122,14 @@ abstract class FragmentBindingModule {
     @FragmentScope
     @ContributesAndroidInjector
     abstract fun postListFragment(): PostListFragment
+
+    @FragmentScope
+    @ContributesAndroidInjector
+    abstract fun calendarFragment(): CalendarFragment
+
+    @FragmentScope
+    @ContributesAndroidInjector
+    abstract fun tabFragment(): TabFragment
 }
 
 @Module abstract class ViewModelFactoryModule {
@@ -129,18 +139,15 @@ abstract class FragmentBindingModule {
 
 @Module
 abstract class ViewModelModule {
-    /*
     @Binds
     @IntoMap
-    @ViewModelKey(WritingViewModel::class)
-    internal abstract fun bindWritingViewModel(writingViewModel: WritingViewModel): ViewModel
-
-     */
+    @ViewModelKey(MainViewModel::class)
+    internal abstract fun bindMainViewModel(mainViewModel: MainViewModel): ViewModel
 
     @Binds
     @IntoMap
-    @ViewModelKey(PostListViewModel::class)
-    internal abstract fun bindPostListViewModel(postListViewModel: PostListViewModel): ViewModel
+    @ViewModelKey(CalendarViewModel::class)
+    internal abstract fun bindCalendarViewModel(calendarViewModel: CalendarViewModel): ViewModel
 }
 
 @AssistedModule

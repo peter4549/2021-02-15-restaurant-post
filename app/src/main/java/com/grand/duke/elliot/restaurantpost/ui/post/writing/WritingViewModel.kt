@@ -73,6 +73,9 @@ class WritingViewModel @AssistedInject constructor(
     val place: LiveData<Place?>
         get() = _place
 
+    private val existingPlace = post?.place?.deepCopy()
+
+    fun existingPlace() = existingPlace
     fun place() = _place.value
 
     private val _photoUriStringList = MutableLiveData<MutableList<String>>(mutableListOf())
@@ -203,11 +206,11 @@ class WritingViewModel @AssistedInject constructor(
         }
     }
 
-    private suspend fun insertTagList(post: Post) {
+    private suspend fun insertTagList(postId: Long) {
         postTagCrossRefDao.insertAll(tagList().map {
             PostTagCrossRef(
                     tagId = it.id,
-                    postId = post.id
+                    postId = postId
             )
         })
     }
@@ -218,12 +221,17 @@ class WritingViewModel @AssistedInject constructor(
                 postDao.insert(post)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe({
+                        .subscribe({ postId ->
                             onComplete(null)
+                            viewModelScope.launch {
+                                withContext(Dispatchers.IO) {
+                                    insertTagList(postId)
+                                }
+                            }
                         }, {
                             onComplete(it)
                         })
-                insertTagList(post)
+
             }
         }
     }

@@ -2,7 +2,7 @@ package com.grand.duke.elliot.restaurantpost.application
 
 import android.app.Application
 import androidx.annotation.ColorInt
-import com.grand.duke.elliot.restaurantpost.application.shared_preferences.SharedPreferences
+import com.grand.duke.elliot.restaurantpost.application.shared_preferences.SharedPreferencesHelper
 import com.grand.duke.elliot.restaurantpost.dagger.component.DaggerApplicationComponent
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
@@ -16,7 +16,7 @@ class MainApplication: Application(), HasAndroidInjector {
     lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
 
     @Inject
-    lateinit var sharedPreferences: SharedPreferences
+    lateinit var sharedPreferencesHelper: SharedPreferencesHelper
 
     override fun onCreate() {
         super.onCreate()
@@ -26,7 +26,7 @@ class MainApplication: Application(), HasAndroidInjector {
             .build()
             .inject(this)
 
-        themePrimaryColor = sharedPreferences.getPrimaryThemeColor()
+        themePrimaryColor = sharedPreferencesHelper.getPrimaryThemeColor()
     }
 
     override fun androidInjector(): AndroidInjector<Any> = dispatchingAndroidInjector

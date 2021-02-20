@@ -1,22 +1,42 @@
 package com.grand.duke.elliot.restaurantpost.ui.tag
 
-import android.view.View
 import com.grand.duke.elliot.restaurantpost.application.MainApplication
 import com.grand.duke.elliot.restaurantpost.repository.data.DisplayTag
-import com.grand.duke.elliot.restaurantpost.ui.util.dialog_fragment.AdapterItem
+import com.grand.duke.elliot.restaurantpost.ui.util.dialog_fragment.SearchBarListItem
 import com.grand.duke.elliot.restaurantpost.ui.util.dialog_fragment.SearchBarListAdapter
+import com.grand.duke.elliot.restaurantpost.ui.util.hide
 import com.grand.duke.elliot.restaurantpost.ui.util.setTextWithSearchWordColorChange
+import com.grand.duke.elliot.restaurantpost.ui.util.show
 
-class DisplayTagListAdapter: SearchBarListAdapter<DisplayTag>() {
+class DisplayTagListAdapter(private val useCheckBox: Boolean = false): SearchBarListAdapter<DisplayTag>() {
+
+    private var onTagCheckedChangeListener: OnTagCheckedChangeListener? = null
+
+    fun setOnTagCheckedChangeListener(onItemCheckedChangeListener: OnTagCheckedChangeListener) {
+        this.onTagCheckedChangeListener = onItemCheckedChangeListener
+    }
+
+    interface OnTagCheckedChangeListener {
+        fun onTagCheckedChange(id: Long, isChecked: Boolean)
+    }
 
     override fun deepCopy(item: DisplayTag): DisplayTag = item.deepCopy()
 
-    override fun bind(viewHolder: ViewHolder, adapterItem: AdapterItem<DisplayTag>) {
-        val displayTag = adapterItem.item
-        viewHolder.binding.imageView.visibility = View.GONE
-        viewHolder.binding.imageViewMore.visibility = View.VISIBLE
-        viewHolder.binding.textViewCount.visibility = View.VISIBLE
-        viewHolder.binding.viewColorBar.visibility = View.GONE
+    override fun bind(viewHolder: ViewHolder, searchBarListItem: SearchBarListItem<DisplayTag>) {
+        val displayTag = searchBarListItem.item
+
+        if (useCheckBox) {
+            viewHolder.binding.appCompatCheckBox.show()
+            viewHolder.binding.appCompatCheckBox.setOnCheckedChangeListener { _, b ->
+                onTagCheckedChangeListener?.onTagCheckedChange(displayTag.tag.id, b)
+            }
+        } else
+            viewHolder.binding.appCompatCheckBox.hide()
+
+        viewHolder.binding.imageView.hide()
+        viewHolder.binding.imageViewMore.show()
+        viewHolder.binding.textViewCount.show()
+        viewHolder.binding.viewColorBar.hide()
 
         setTextWithSearchWordColorChange(
                 viewHolder.binding.textViewName,
@@ -28,17 +48,20 @@ class DisplayTagListAdapter: SearchBarListAdapter<DisplayTag>() {
         viewHolder.binding.textViewCount.text = displayTag.postListCount.toString()
 
         viewHolder.binding.imageViewMore.setOnClickListener {
-            showPopupMenu(it, displayTag, viewHolder.adapterPosition)
+            showPopupMenu(it, displayTag, viewHolder.absoluteAdapterPosition)
         }
 
         viewHolder.binding.root.setOnClickListener {
-            onItemClickListener?.onItemClick(adapterItem.item, viewHolder.adapterPosition)
+            onItemClickListener?.onItemClick(searchBarListItem.item, viewHolder.absoluteAdapterPosition)
+
+            if (useCheckBox)
+                viewHolder.binding.appCompatCheckBox.toggle()
         }
     }
 
-    override fun filter(adapterItem: AdapterItem<DisplayTag>, searchWord: String): AdapterItem<DisplayTag>? {
-        if (adapterItem.item.tag.name.contains(searchWord))
-            return adapterItem
+    override fun filter(searchBarListItem: SearchBarListItem<DisplayTag>, searchWord: String): SearchBarListItem<DisplayTag>? {
+        if (searchBarListItem.item.tag.name.contains(searchWord))
+            return searchBarListItem
 
         return null
     }
