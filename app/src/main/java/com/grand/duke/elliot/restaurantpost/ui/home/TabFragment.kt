@@ -5,9 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
-import androidx.annotation.DrawableRes
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -17,16 +15,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayoutMediator
 import com.grand.duke.elliot.restaurantpost.R
 import com.grand.duke.elliot.restaurantpost.base.BaseFragment
-import com.grand.duke.elliot.restaurantpost.databinding.FragmentTabBinding
 import com.grand.duke.elliot.restaurantpost.databinding.FragmentTabDrawerBinding
-import com.grand.duke.elliot.restaurantpost.databinding.ItemDrawerListBinding
 import com.grand.duke.elliot.restaurantpost.repository.data.DisplayFolder
+import com.grand.duke.elliot.restaurantpost.repository.data.DisplayPlace
 import com.grand.duke.elliot.restaurantpost.repository.data.DisplayTag
 import com.grand.duke.elliot.restaurantpost.ui.calendar.CalendarFragment
 import com.grand.duke.elliot.restaurantpost.ui.drawer.DrawerItem
 import com.grand.duke.elliot.restaurantpost.ui.drawer.DrawerItemAdapter
 import com.grand.duke.elliot.restaurantpost.ui.folder.DisplayFolderListAdapter
-import com.grand.duke.elliot.restaurantpost.ui.post.list.AdapterItem
+import com.grand.duke.elliot.restaurantpost.ui.place.DisplayPlaceListAdapter
 import com.grand.duke.elliot.restaurantpost.ui.post.list.PostListFragment
 import com.grand.duke.elliot.restaurantpost.ui.post.writing.WritingActivity
 import com.grand.duke.elliot.restaurantpost.ui.tag.DisplayTagListAdapter
@@ -44,6 +41,7 @@ class TabFragment: BaseFragment<MainViewModel, FragmentTabDrawerBinding>() {
         CompositeDisposable()
     }
     private val displayFolderListAdapter = DisplayFolderListAdapter()
+    private val displayPlaceAdapter = DisplayPlaceListAdapter(true)
     private val displayTagListAdapter = DisplayTagListAdapter(true)
 
     override fun onCreateView(
@@ -130,6 +128,15 @@ class TabFragment: BaseFragment<MainViewModel, FragmentTabDrawerBinding>() {
                                     iconResourceId = R.drawable.ic_round_tag_24,
                                     onHeaderClick = null, // todo imp.
                                     onMoreIconClick = null // todo imp.
+                            ),
+                            DrawerItem.ListItem(
+                                    id = 2L,
+                                    adapter = displayPlaceAdapter as ListAdapter<SearchBarListItem<DisplayPlace>, RecyclerView.ViewHolder>,
+                                    title = getString(R.string.place),
+                                    iconColor = getColor(R.color.color_icon),
+                                    iconResourceId = R.drawable.ic_round_location_on_24,
+                                    onHeaderClick = null, // todo imp.
+                                    onMoreIconClick = null // todo imp.
                             )
                     )
             )
@@ -155,6 +162,19 @@ class TabFragment: BaseFragment<MainViewModel, FragmentTabDrawerBinding>() {
                 .subscribe({
                     displayTagListAdapter.submitItemList(it.map { tagWithPostList ->
                         DisplayTag(tagWithPostList.tag, tagWithPostList.postList.count())
+                    })
+                }, {
+                    Timber.e(it)
+                }))
+
+        compositeDisposable.add(viewModel.placeWithPostListFlowable()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    displayPlaceAdapter.submitItemList(it.map { placeWithPostList ->
+                        val place = placeWithPostList.place
+                        val postList = placeWithPostList.postList
+                        DisplayPlace(place.id, place.name, postList.count())
                     })
                 }, {
                     Timber.e(it)

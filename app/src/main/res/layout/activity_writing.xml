@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/background">
@@ -183,13 +184,12 @@
                             app:chipIcon="@drawable/ic_round_location_on_24"
                             tools:text="서울특별시" />
 
-                        <fragment
-                            android:id="@+id/fragment_support_map"
+                        <androidx.fragment.app.FragmentContainerView
+                            android:id="@+id/fragment_container_view_support_map"
                             android:name="com.google.android.gms.maps.SupportMapFragment"
                             android:layout_width="match_parent"
                             android:layout_height="224dp"
-                            tools:context=".ui.post.writing.WritingActivity"
-                            tools:ignore="FragmentTagUsage" />
+                            tools:context=".ui.post.writing.WritingActivity" />
                     </LinearLayout>
 
                     <FrameLayout

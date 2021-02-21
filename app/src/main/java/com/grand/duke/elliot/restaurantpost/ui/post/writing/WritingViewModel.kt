@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.grand.duke.elliot.restaurantpost.application.noFolderSelected
 import com.grand.duke.elliot.restaurantpost.persistence.data.*
 import com.grand.duke.elliot.restaurantpost.repository.LocalRepository
 import com.grand.duke.elliot.restaurantpost.ui.util.difference
@@ -17,6 +18,7 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 class WritingViewModel @AssistedInject constructor(
         @Assisted private val post: Post?,
@@ -24,6 +26,7 @@ class WritingViewModel @AssistedInject constructor(
 ): ViewModel() {
 
     private val folderDao = localRepository.folderDao
+    private val placeDao = localRepository.placeDao
     private val postDao = localRepository.postDao
     private val postTagCrossRefDao = localRepository.postTagCrossRefDao
     private val tagDao = localRepository.tagDao
@@ -53,6 +56,9 @@ class WritingViewModel @AssistedInject constructor(
     val folder: LiveData<Folder?>
         get() = _folder
 
+    private val existingFolderId = post?.folderId
+
+    fun existingFolderId() = existingFolderId
     fun folder() = _folder.value
 
     init {
@@ -69,14 +75,20 @@ class WritingViewModel @AssistedInject constructor(
         _folder.value = folder
     }
 
-    private val _place = MutableLiveData<Place?>(post?.place?.deepCopy())
+    private val _place = MutableLiveData<Place?>(null)
     val place: LiveData<Place?>
         get() = _place
 
-    private val existingPlace = post?.place?.deepCopy()
+    private val existingPlaceId: Long? = post?.placeId
 
-    fun existingPlace() = existingPlace
+    fun existingPlaceId() = existingPlaceId
     fun place() = _place.value
+
+    init {
+        post?.let {
+            _place.value = placeDao.get(it.placeId)
+        }
+    }
 
     private val _photoUriStringList = MutableLiveData<MutableList<String>>(mutableListOf())
     val photoUriStringList: LiveData<MutableList<String>>
@@ -231,7 +243,6 @@ class WritingViewModel @AssistedInject constructor(
                         }, {
                             onComplete(it)
                         })
-
             }
         }
     }

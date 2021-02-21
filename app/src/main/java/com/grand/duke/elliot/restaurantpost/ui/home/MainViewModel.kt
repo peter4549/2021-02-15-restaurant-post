@@ -25,6 +25,11 @@ class MainViewModel @Inject constructor(application: Application, localRepositor
     @Suppress("SpellCheckingInspection")
     fun tagWithPostListFlowable() = tagWithPostListFlowable
 
+    @Suppress("SpellCheckingInspection")
+    private val placeWithPostListFlowable = localRepository.placeWithPostListFlowable()
+    @Suppress("SpellCheckingInspection")
+    fun placeWithPostListFlowable() = placeWithPostListFlowable
+
     private val _checkedTagIdHashSet = MutableLiveData<HashSet<Long>>()
     val checkedTagIdHashSet: LiveData<HashSet<Long>>
         get() = _checkedTagIdHashSet

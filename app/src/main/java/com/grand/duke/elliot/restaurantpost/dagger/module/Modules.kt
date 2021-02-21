@@ -19,6 +19,9 @@ import com.grand.duke.elliot.restaurantpost.ui.folder.FolderEditingDialogFragmen
 import com.grand.duke.elliot.restaurantpost.ui.home.MainActivity
 import com.grand.duke.elliot.restaurantpost.ui.home.MainViewModel
 import com.grand.duke.elliot.restaurantpost.ui.home.TabFragment
+import com.grand.duke.elliot.restaurantpost.ui.place.DisplayPlaceListDialogFragment
+import com.grand.duke.elliot.restaurantpost.ui.google_maps.GoogleMapsActivity
+import com.grand.duke.elliot.restaurantpost.ui.google_maps.GoogleMapsViewModel
 import com.grand.duke.elliot.restaurantpost.ui.post.list.PostListFragment
 import com.grand.duke.elliot.restaurantpost.ui.post.writing.WritingActivity
 import com.grand.duke.elliot.restaurantpost.ui.tag.DisplayTagListDialogFragment
@@ -86,7 +89,6 @@ class ApplicationModule {
         return LocalRepository(folderDao, placeDao, postDao, tagDao, postTagCrossRefDao)
     }
 
-
     @Provides
     @Singleton
     internal fun provideSharedPreferences(sharedPreferences: SharedPreferences): SharedPreferences {
@@ -99,6 +101,10 @@ abstract class ActivityBindingModule {
     @ActivityScope
     @ContributesAndroidInjector
     abstract fun mainActivity(): MainActivity
+
+    @FragmentScope
+    @ContributesAndroidInjector
+    abstract fun googleMapsActivity(): GoogleMapsActivity
 }
 
 @Module
@@ -114,6 +120,10 @@ abstract class FragmentBindingModule {
     @FragmentScope
     @ContributesAndroidInjector
     abstract fun displayTagListDialogFragment(): DisplayTagListDialogFragment
+
+    @FragmentScope
+    @ContributesAndroidInjector
+    abstract fun displayPlaceListDialogFragment(): DisplayPlaceListDialogFragment
 
     @FragmentScope
     @ContributesAndroidInjector
@@ -148,6 +158,11 @@ abstract class ViewModelModule {
     @IntoMap
     @ViewModelKey(CalendarViewModel::class)
     internal abstract fun bindCalendarViewModel(calendarViewModel: CalendarViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(GoogleMapsViewModel::class)
+    internal abstract fun bindGoogleMapsViewModel(googleMapsViewModel: GoogleMapsViewModel): ViewModel
 }
 
 @AssistedModule

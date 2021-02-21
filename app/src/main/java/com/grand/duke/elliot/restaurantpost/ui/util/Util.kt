@@ -7,8 +7,11 @@ import android.util.DisplayMetrics
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import com.grand.duke.elliot.restaurantpost.persistence.data.Post
+import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.pow
+import kotlin.math.roundToInt
 
 const val blank = ""
 
@@ -25,6 +28,17 @@ fun Int.toDp(): Float {
 
 fun Int.toPx(): Float {
     return this * Resources.getSystem().displayMetrics.density
+}
+
+fun Double.roundTo(place: Int): Double {
+    val pow = 10.0.pow(place)
+    return (this * pow).roundToInt() / pow
+}
+
+fun hashString(input: String, size: Int = 32, algorithm: String = "SHA-256"): String {
+    return MessageDigest.getInstance(algorithm)
+            .digest(input.toByteArray())
+            .fold("", { string, it -> string + "%02x".format(it) }).chunked(size)[0]
 }
 
 fun setTextWithSearchWordColorChange(

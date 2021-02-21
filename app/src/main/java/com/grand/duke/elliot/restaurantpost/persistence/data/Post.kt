@@ -13,7 +13,7 @@ data class Post (
         @ColumnInfo(name = "folder_id") var folderId: Long,
         var modifiedTime: Long,
         var photoUriStringArray: Array<String>,
-        var place: Place?,
+        @ColumnInfo(name = "place_id") var placeId: Long,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -26,7 +26,7 @@ data class Post (
         if (folderId != other.folderId) return false
         if (modifiedTime != other.modifiedTime) return false
         if (!photoUriStringArray.contentEquals(other.photoUriStringArray)) return false
-        if (place != other.place) return false
+        if (placeId != other.placeId) return false
 
         return true
     }
@@ -37,7 +37,7 @@ data class Post (
         result = 31 * result + folderId.hashCode()
         result = 31 * result + modifiedTime.hashCode()
         result = 31 * result + photoUriStringArray.contentHashCode()
-        result = 31 * result + (place?.hashCode() ?: 0)
+        result = 31 * result + placeId.hashCode()
         return result
     }
 }

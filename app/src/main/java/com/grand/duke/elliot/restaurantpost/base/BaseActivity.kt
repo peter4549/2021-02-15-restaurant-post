@@ -1,6 +1,7 @@
 package com.grand.duke.elliot.restaurantpost.base
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
@@ -28,5 +29,9 @@ abstract class BaseActivity<viewModel: ViewModel, viewDataBinding: ViewDataBindi
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProvider(viewModelStore, viewModelFactory).get(viewModel())
         viewDataBinding = DataBindingUtil.setContentView(this, layoutRes)
+    }
+
+    protected fun showToast(text: String, duration: Int = Toast.LENGTH_LONG) {
+        Toast.makeText(this, text, duration).show()
     }
 }

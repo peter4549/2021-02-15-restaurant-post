@@ -2,6 +2,7 @@ package com.grand.duke.elliot.restaurantpost.repository
 
 import com.grand.duke.elliot.restaurantpost.persistence.dao.*
 import com.grand.duke.elliot.restaurantpost.persistence.data.FolderWithPostList
+import com.grand.duke.elliot.restaurantpost.persistence.data.PlaceWithPostList
 import com.grand.duke.elliot.restaurantpost.persistence.data.TagWithPostList
 import io.reactivex.Flowable
 import javax.inject.Inject
@@ -28,4 +29,12 @@ class LocalRepository @Inject constructor(
 
     @Suppress("SpellCheckingInspection")
     fun tagWithPostListFlowable() = tagWithPostListFlowable
+
+    @Suppress("SpellCheckingInspection")
+    private val placeWithPostListFlowable: Flowable<List<PlaceWithPostList>> by lazy {
+        placeDao.getAll()
+    }
+
+    @Suppress("SpellCheckingInspection")
+    fun placeWithPostListFlowable() = placeWithPostListFlowable
 }

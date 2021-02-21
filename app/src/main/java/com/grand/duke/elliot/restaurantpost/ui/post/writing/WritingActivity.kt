@@ -3,7 +3,6 @@ package com.grand.duke.elliot.restaurantpost.ui.post.writing
 import android.Manifest
 import android.content.DialogInterface
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.util.Size
@@ -29,6 +28,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.grand.duke.elliot.restaurantpost.R
 import com.grand.duke.elliot.restaurantpost.application.MainApplication
 import com.grand.duke.elliot.restaurantpost.application.noFolderSelected
+import com.grand.duke.elliot.restaurantpost.application.noPlaceSelected
 import com.grand.duke.elliot.restaurantpost.databinding.ActivityWritingBinding
 import com.grand.duke.elliot.restaurantpost.persistence.data.Folder
 import com.grand.duke.elliot.restaurantpost.persistence.data.Place
@@ -40,6 +40,8 @@ import com.grand.duke.elliot.restaurantpost.repository.data.DisplayTag
 import com.grand.duke.elliot.restaurantpost.ui.fluid_content_resize.FluidContentResize
 import com.grand.duke.elliot.restaurantpost.ui.folder.DisplayFolderListDialogFragment
 import com.grand.duke.elliot.restaurantpost.ui.folder.FolderEditingDialogFragment
+import com.grand.duke.elliot.restaurantpost.ui.google_maps.GoogleMapsActivity
+import com.grand.duke.elliot.restaurantpost.ui.place.DisplayPlaceListDialogFragment
 import com.grand.duke.elliot.restaurantpost.ui.post.photo.PhotoHelper
 import com.grand.duke.elliot.restaurantpost.ui.post.photo.PhotoUriStringAdapter
 import com.grand.duke.elliot.restaurantpost.ui.tag.DisplayTagListDialogFragment
@@ -60,10 +62,10 @@ import java.lang.NullPointerException
 import javax.inject.Inject
 
 class WritingActivity: AppCompatActivity(),
-        ObservableScrollViewCallbacks, OnMapReadyCallback,
-        SearchBarListDialogFragment.FragmentContainer,
-        FolderEditingDialogFragment.FragmentContainer, TagEditingDialogFragment.FragmentContainer,
-        SimpleListDialogFragment.FragmentContainer {
+    ObservableScrollViewCallbacks, OnMapReadyCallback,
+    SearchBarListDialogFragment.FragmentContainer,
+    FolderEditingDialogFragment.FragmentContainer, TagEditingDialogFragment.FragmentContainer,
+    SimpleListDialogFragment.FragmentContainer {
 
     @Inject
     lateinit var viewModelFactory: WritingViewModel.Factory
@@ -77,7 +79,6 @@ class WritingActivity: AppCompatActivity(),
 
     private val menuRes = R.menu.menu_writing_activity
 
-    private lateinit var location: com.grand.duke.elliot.restaurantpost.ui.post.location.Location
     private var googleMap: GoogleMap? = null
     private var marker: Marker? = null
 
@@ -92,15 +93,19 @@ class WritingActivity: AppCompatActivity(),
     private var bottomSheetIsShown = true
     private var bottomSheetHeight = 0F
 
-    private var lastPlaceInitialized = false
-
     private var chipFolder: Chip? = null
+
+    private fun isCreationMode() = viewModel.mode() == WritingViewModel.Mode.Creation
 
     object SimpleItemId {
         const val ImageCapture = "com.grand.duke.elliot.restaurantpost.ui.post" +
                 ".simple_item_id.image_capture"
         const val ImagePick = "com.grand.duke.elliot.restaurantpost.ui.post" +
                 ".simple_item_id.image_pick"
+    }
+
+    private object RequestCode {
+        const val GoogleMapsActivity = 13
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -232,14 +237,28 @@ class WritingActivity: AppCompatActivity(),
                 }
             }
         })
+
+        /** Place. */
+        viewModel.place.observe(this@WritingActivity, {
+            it?.run {
+                //binding.linearLayoutPlace.fadeIn(shortAnimationDuration)
+                if (binding.chipPlace.isVisible.not())
+                    binding.chipPlace.fadeIn(shortAnimationDuration)
+                updateMap(it)
+            } ?: run {
+
+                //binding.linearLayoutPlace.fadeOut(shortAnimationDuration)
+                //if (binding.chipPlace.isVisible) todo. test.
+                //  binding.chipPlace.fadeOut(shortAnimationDuration)
+            }
+        })
     }
 
     private fun requestPermissions() {
         val multiplePermissionListener = object: MultiplePermissionsListener {
             override fun onPermissionsChecked(report: MultiplePermissionsReport) {
                 if (report.deniedPermissionResponses.isEmpty()) {
-                    if (lastPlaceInitialized.not())
-                        setupLastPlace()
+                    // todo something.
                     return
                 }
 
@@ -257,37 +276,22 @@ class WritingActivity: AppCompatActivity(),
         }
 
         Dexter.withContext(this)
-                .withPermissions(
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                )
-                .withListener(multiplePermissionListener)
-                .check()
+            .withPermissions(
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+            .withListener(multiplePermissionListener)
+            .check()
     }
 
     override fun onMapReady(googleMap: GoogleMap?) {
         this.googleMap = googleMap
-
-        if (lastPlaceInitialized.not())
-            setupLastPlace()
-    }
-
-    private fun setupLastPlace() {
-        location.lastPlace {
-            it?.also {
-                lastPlaceInitialized = true
-                viewModel.setPlace(it)
-            } ?: run {
-                lastPlaceInitialized = false
-                viewModel.setPlace(location.defaultPlace())
-            }
-        }
+        uiController.initMap()
     }
 
     private inner class UiController {
 
         fun init() {
-            updateMap()
             setText()
             initBottomSheet()
             initObservableScrollView()
@@ -295,21 +299,9 @@ class WritingActivity: AppCompatActivity(),
             initToolbar()
         }
 
-        fun updateMap() {
-            location = com.grand.duke.elliot.restaurantpost.ui.post.location.Location(this@WritingActivity)
-            val supportMapFragment = supportFragmentManager.findFragmentById(R.id.fragment_support_map) as SupportMapFragment
+        fun initMap() {
+            val supportMapFragment = supportFragmentManager.findFragmentById(R.id.fragment_container_view_support_map) as SupportMapFragment
             supportMapFragment.getMapAsync(this@WritingActivity)
-
-            viewModel.place.observe(this@WritingActivity, {
-                it?.run {
-                    if (binding.chipPlace.isVisible.not())
-                        binding.chipPlace.fadeIn(shortAnimationDuration)
-                    updateMap(it)
-                } ?: run {
-                    if (binding.chipPlace.isVisible)
-                        binding.chipPlace.fadeOut(shortAnimationDuration)
-                }
-            })
         }
 
         private fun initObservableScrollView() {
@@ -356,6 +348,14 @@ class WritingActivity: AppCompatActivity(),
                 }
             }
 
+            binding.imageViewLocation.setOnClickListener {
+                val title = getString(R.string.place)
+                DisplayPlaceListDialogFragment().apply{
+                    setTitle(title)
+                    show(supportFragmentManager, tag)
+                }
+            }
+
             binding.imageViewFolder.setOnClickListener {
                 val title = getString(R.string.folder)
                 DisplayFolderListDialogFragment().apply{
@@ -378,7 +378,7 @@ class WritingActivity: AppCompatActivity(),
                 simpleListDialogFragment.setItems(
                     arrayListOf(
                         SimpleItem(
-                                SimpleItemId.ImageCapture,
+                            SimpleItemId.ImageCapture,
                             getString(R.string.photo_shoot),
                             ContextCompat.getDrawable(
                                 this@WritingActivity,
@@ -386,7 +386,7 @@ class WritingActivity: AppCompatActivity(),
                             )
                         ),
                         SimpleItem(
-                                SimpleItemId.ImagePick,
+                            SimpleItemId.ImagePick,
                             getString(R.string.select_from_album),
                             ContextCompat.getDrawable(
                                 this@WritingActivity,
@@ -542,10 +542,10 @@ class WritingActivity: AppCompatActivity(),
                     if (it.description != binding.editTextDescription.text.toString())
                         return true
 
-                    if (it.folderId != viewModel.folder()?.id)
+                    if (viewModel.existingFolderId() != viewModel.folder()?.id)
                         return true
 
-                    if (viewModel.existingPlace() != viewModel.place())
+                    if (viewModel.existingPlaceId() != viewModel.place()?.id)
                         return true
 
                     if (viewModel.existingTagArray().contentEquals(viewModel.tagList().toTypedArray()).not())
@@ -560,11 +560,11 @@ class WritingActivity: AppCompatActivity(),
 
     private fun createPost(): Post {
         return Post(
-                description = binding.editTextDescription.text.toString(),
-                folderId = viewModel.folder()?.id ?: noFolderSelected,
-                modifiedTime = viewModel.modifiedTime,
-                photoUriStringArray = viewModel.photoUriList().toTypedArray(),
-                place = viewModel.place()
+            description = binding.editTextDescription.text.toString(),
+            folderId = viewModel.folder()?.id ?: noFolderSelected,
+            modifiedTime = viewModel.modifiedTime,
+            photoUriStringArray = viewModel.photoUriList().toTypedArray(),
+            placeId = viewModel.place()?.id ?: noPlaceSelected
         )
     }
 
@@ -635,134 +635,140 @@ class WritingActivity: AppCompatActivity(),
 
     private fun showSaveConfirmationDialog() {
         val title =
-                if (viewModel.mode() == WritingViewModel.Mode.Creation)
-                    getString(R.string.save_confirmation_dialog_title)
-                else
-                    getString(R.string.change_confirmation_dialog_title)
+            if (viewModel.mode() == WritingViewModel.Mode.Creation)
+                getString(R.string.save_confirmation_dialog_title)
+            else
+                getString(R.string.change_confirmation_dialog_title)
         val message =
-                if (viewModel.mode() == WritingViewModel.Mode.Creation)
-                    getString(R.string.save_confirmation_dialog_message)
-                else
-                    getString(R.string.change_confirmation_dialog_message)
+            if (viewModel.mode() == WritingViewModel.Mode.Creation)
+                getString(R.string.save_confirmation_dialog_message)
+            else
+                getString(R.string.change_confirmation_dialog_message)
 
         showMaterialAlertDialog(
-                title = title,
-                message = message,
-                neutralButtonText = getString(R.string.cancel),
-                neutralButtonClickListener = { dialogInterface, _ ->
-                    dialogInterface?.dismiss()
-                },
-                negativeButtonText = getString(R.string.do_not_save),
-                negativeButtonClickListener = { dialogInterface, _ ->
-                    finish()
-                    dialogInterface?.dismiss()
-                },
-                positiveButtonText = getString(R.string.save),
-                positiveButtonClickListener = { dialogInterface, _ ->
-                    if (viewModel.mode() == WritingViewModel.Mode.Creation)
-                        this.finishWithSave()
-                    else
-                        finishWithUpdate()
+            title = title,
+            message = message,
+            neutralButtonText = getString(R.string.cancel),
+            neutralButtonClickListener = { dialogInterface, _ ->
+                dialogInterface?.dismiss()
+            },
+            negativeButtonText = getString(R.string.do_not_save),
+            negativeButtonClickListener = { dialogInterface, _ ->
+                finish()
+                dialogInterface?.dismiss()
+            },
+            positiveButtonText = getString(R.string.save),
+            positiveButtonClickListener = { dialogInterface, _ ->
+                if (viewModel.mode() == WritingViewModel.Mode.Creation)
+                    this.finishWithSave()
+                else
+                    finishWithUpdate()
 
-                    dialogInterface?.dismiss()
-                }
+                dialogInterface?.dismiss()
+            }
         )
     }
 
     private fun showMaterialAlertDialog(
-            title: String?,
-            message: String?,
-            neutralButtonText: String?,
-            neutralButtonClickListener: ((DialogInterface?, Int) -> Unit)?,
-            negativeButtonText: String?,
-            negativeButtonClickListener: ((DialogInterface?, Int) -> Unit)?,
-            positiveButtonText: String?,
-            positiveButtonClickListener: ((DialogInterface?, Int) -> Unit)?
+        title: String?,
+        message: String?,
+        neutralButtonText: String?,
+        neutralButtonClickListener: ((DialogInterface?, Int) -> Unit)?,
+        negativeButtonText: String?,
+        negativeButtonClickListener: ((DialogInterface?, Int) -> Unit)?,
+        positiveButtonText: String?,
+        positiveButtonClickListener: ((DialogInterface?, Int) -> Unit)?
     ) {
-        val materialAlertDialog = MaterialAlertDialogBuilder(this)
-                .setTitle(title)
-                .setMessage(message)
-                .setNeutralButton(neutralButtonText, neutralButtonClickListener)
-                .setNegativeButton(negativeButtonText, negativeButtonClickListener)
-                .setPositiveButton(positiveButtonText, positiveButtonClickListener)
-                .setCancelable(false)
-                .show()
+        MaterialAlertDialogBuilder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setNeutralButton(neutralButtonText, neutralButtonClickListener)
+            .setNegativeButton(negativeButtonText, negativeButtonClickListener)
+            .setPositiveButton(positiveButtonText, positiveButtonClickListener)
+            .setCancelable(false)
+            .show()
+    }
+
+    private fun startGoogleMapsActivity() {
+        val intent = Intent(this, GoogleMapsActivity::class.java)
+        startActivityForResult(intent, RequestCode.GoogleMapsActivity)
     }
 
     /** SearchBarListDialogFragment.FragmentContainer. */
     override fun onRequestOnClickListener(): SearchBarListDialogFragment.OnClickListener =
-            object: SearchBarListDialogFragment.OnClickListener {
-                override fun onAddClick(dialogFragment: DialogFragment) {
-                    when (dialogFragment) {
-                        is DisplayFolderListDialogFragment ->
-                            FolderEditingDialogFragment().run { show(supportFragmentManager, tag) }
-                        is DisplayTagListDialogFragment ->
-                            TagEditingDialogFragment().run { show(supportFragmentManager, tag) }
-                    }
+        object: SearchBarListDialogFragment.OnClickListener {
+            override fun onAddClick(dialogFragment: DialogFragment) {
+                when (dialogFragment) {
+                    is DisplayFolderListDialogFragment ->
+                        FolderEditingDialogFragment().run { show(supportFragmentManager, tag) }
+                    is DisplayTagListDialogFragment ->
+                        TagEditingDialogFragment().run { show(supportFragmentManager, tag) }
+                    is DisplayPlaceListDialogFragment -> { startGoogleMapsActivity() }
                 }
             }
+        }
 
     override fun <T> onRequestOnItemClickListener(): SearchBarListAdapter.OnItemClickListener<T> =
-            object: SearchBarListAdapter.OnItemClickListener<T> {
-                override fun onItemClick(item: T, adapterPosition: Int) {
-                    when(item) {
-                        is DisplayFolder -> {
-                            viewModel.setFolder(item.folder)
-                        }
-                        is DisplayTag -> {
-                            viewModel.addTag(item.tag)
-                        }
+        object: SearchBarListAdapter.OnItemClickListener<T> {
+            override fun onItemClick(item: T, adapterPosition: Int) {
+                when(item) {
+                    is DisplayFolder -> {
+                        viewModel.setFolder(item.folder)
+                    }
+                    is DisplayTag -> {
+                        viewModel.addTag(item.tag)
                     }
                 }
+            }
 
-                override fun onDeleteClick(item: T) {
-                    when(item) {
-                        is DisplayFolder -> viewModel.deleteFolder(item.folder)
-                        is DisplayTag -> viewModel.deleteTag(item.tag)
-                    }
+            override fun onDeleteClick(item: T) {
+                when(item) {
+                    is DisplayFolder -> viewModel.deleteFolder(item.folder)
+                    is DisplayTag -> viewModel.deleteTag(item.tag)
                 }
+            }
 
-                override fun onEditClick(item: T) {
-                    when(item) {
-                        is DisplayFolder -> {
-                            FolderEditingDialogFragment().apply {
-                                setFolder(item.folder.deepCopy())
-                                show(supportFragmentManager, tag)
-                            }
+            override fun onEditClick(item: T) {
+                when(item) {
+                    is DisplayFolder -> {
+                        FolderEditingDialogFragment().apply {
+                            setFolder(item.folder.deepCopy())
+                            show(supportFragmentManager, tag)
                         }
-                        is DisplayTag -> {
-                            TagEditingDialogFragment().apply {
-                                setTag(item.tag.deepCopy())
-                                show(supportFragmentManager, tag)
-                            }
+                    }
+                    is DisplayTag -> {
+                        TagEditingDialogFragment().apply {
+                            setTag(item.tag.deepCopy())
+                            show(supportFragmentManager, tag)
                         }
                     }
                 }
             }
+        }
 
     /** FolderEditingDialogFragment.FragmentContainer. */
     override fun onRequestOnFolderUpdatedListener(): FolderEditingDialogFragment.OnFolderUpdatedListener =
-            object: FolderEditingDialogFragment.OnFolderUpdatedListener {
-                override fun onFolderUpdated(folder: Folder) {
-                    viewModel.setFolder(folder)
-                }
-
-                override fun onError(throwable: Throwable) {
-                    Timber.e(throwable, "Folder update failed.")
-                }
+        object: FolderEditingDialogFragment.OnFolderUpdatedListener {
+            override fun onFolderUpdated(folder: Folder) {
+                viewModel.setFolder(folder)
             }
+
+            override fun onError(throwable: Throwable) {
+                Timber.e(throwable, "Folder update failed.")
+            }
+        }
 
     /** TagEditingDialogFragment.FragmentContainer. */
     override fun onRequestOnTagUpdatedListener(): TagEditingDialogFragment.OnTagUpdatedListener =
-            object: TagEditingDialogFragment.OnTagUpdatedListener {
-                override fun onTagUpdated(tag: Tag) {
-                    viewModel.updateTag(tag)
-                }
-
-                override fun onError(throwable: Throwable) {
-                    Timber.e(throwable, "Tag update failed.")
-                }
+        object: TagEditingDialogFragment.OnTagUpdatedListener {
+            override fun onTagUpdated(tag: Tag) {
+                viewModel.updateTag(tag)
             }
+
+            override fun onError(throwable: Throwable) {
+                Timber.e(throwable, "Tag update failed.")
+            }
+        }
 
     override fun onRequestOnItemSelectedListener(): SimpleListDialogFragment.OnItemSelectedListener = object: SimpleListDialogFragment.OnItemSelectedListener {
         override fun onItemSelected(dialogFragment: DialogFragment, simpleItem: SimpleItem) {

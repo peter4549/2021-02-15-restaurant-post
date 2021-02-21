@@ -17,11 +17,20 @@ import com.grand.duke.elliot.restaurantpost.ui.util.blank
 abstract class SearchBarListDialogFragment<T>: DialogFragment() {
 
     private lateinit var binding: FragmentSearchBarListDialogBinding
-
     private var title = blank
+
+    private object Key {
+        const val Title = "com.grand.duke.elliot.restaurantpost.ui.util.dialog_fragment" +
+                ".search_bar_list_dialog_fragment.key.title"
+    }
 
     fun setTitle(title: String) {
         this.title = title
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(Key.Title, title)
     }
 
     protected abstract val listAdapter: SearchBarListAdapter<T>?
@@ -59,6 +68,8 @@ abstract class SearchBarListDialogFragment<T>: DialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        savedInstanceState?.also { title = it.getString(Key.Title) ?: blank }
+
         binding = FragmentSearchBarListDialogBinding.inflate(inflater, container, false)
         binding.textViewTitle.text = title
         binding.imageViewAdd.setOnClickListener {
