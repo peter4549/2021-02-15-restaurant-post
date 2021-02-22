@@ -1,9 +1,9 @@
 package com.grand.duke.elliot.restaurantpost.persistence.dao
 
-import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.grand.duke.elliot.restaurantpost.persistence.data.Place
 import com.grand.duke.elliot.restaurantpost.persistence.data.PlaceWithPostList
+import com.grand.duke.elliot.restaurantpost.ui.post.location.PlaceContent
 import io.reactivex.Completable
 import io.reactivex.Flowable
 
@@ -17,11 +17,14 @@ interface PlaceDao {
     fun insert(place: Place): Completable
 
     @Delete
-    fun delete(place: Place)
+    suspend fun delete(place: Place)
 
     @Update
-    fun update(place: Place)
+    fun update(place: Place): Completable
 
     @Query("SELECT * FROM place WHERE place_id = :id LIMIT 1")
     fun get(id: Long): Place?
+
+    @Query("SELECT name, latitude, longitude FROM place")
+    suspend fun getAllPlaceContentList(): List<PlaceContent>
 }

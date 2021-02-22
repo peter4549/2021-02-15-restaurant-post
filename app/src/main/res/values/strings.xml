@@ -12,6 +12,7 @@
     <string name="place">장소</string>
     <string name="post">포스트</string>
     <string name="save">저장</string>
+    <string name="search">검색</string>
 
     <!-- Place. -->
     <string name="default_place_name">서울특별시</string>
@@ -48,4 +49,13 @@
     <string name="edit_tag">태그 편집</string>
     <string name="enter_tag_name">태그 이름을 입력하세요.</string>
     <string name="tag_name">태그 이름</string>
+
+    <!-- GoogleMapsActivity. -->
+    <string name="could_not_load_your_locations">위치 정보를 불러올 수 없습니다.</string>
+    <string name="create_place">장소 만들기</string>
+    <string name="edit_place">장소 편집</string>
+    <string name="enter_place_name">장소 이름을 입력하세요.</string>
+    <string name="failed_to_save_place">장소를 저장하지 못했습니다.</string>
+    <string name="last_location">마지막 위치</string>
+    <string name="place_name">장소 이름</string>
 </resources>

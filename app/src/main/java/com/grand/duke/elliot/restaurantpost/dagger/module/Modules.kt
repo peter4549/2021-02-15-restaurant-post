@@ -22,6 +22,7 @@ import com.grand.duke.elliot.restaurantpost.ui.home.TabFragment
 import com.grand.duke.elliot.restaurantpost.ui.place.DisplayPlaceListDialogFragment
 import com.grand.duke.elliot.restaurantpost.ui.google_maps.GoogleMapsActivity
 import com.grand.duke.elliot.restaurantpost.ui.google_maps.GoogleMapsViewModel
+import com.grand.duke.elliot.restaurantpost.ui.place.PlaceEditingDialogFragment
 import com.grand.duke.elliot.restaurantpost.ui.post.list.PostListFragment
 import com.grand.duke.elliot.restaurantpost.ui.post.writing.WritingActivity
 import com.grand.duke.elliot.restaurantpost.ui.tag.DisplayTagListDialogFragment
@@ -128,6 +129,10 @@ abstract class FragmentBindingModule {
     @FragmentScope
     @ContributesAndroidInjector
     abstract fun tagEditingDialogFragment(): TagEditingDialogFragment
+
+    @FragmentScope
+    @ContributesAndroidInjector
+    abstract fun placeEditingDialogFragment(): PlaceEditingDialogFragment
 
     @FragmentScope
     @ContributesAndroidInjector

@@ -36,12 +36,14 @@ import com.grand.duke.elliot.restaurantpost.persistence.data.Post
 import com.grand.duke.elliot.restaurantpost.persistence.data.Tag
 import com.grand.duke.elliot.restaurantpost.repository.LocalRepository
 import com.grand.duke.elliot.restaurantpost.repository.data.DisplayFolder
+import com.grand.duke.elliot.restaurantpost.repository.data.DisplayPlace
 import com.grand.duke.elliot.restaurantpost.repository.data.DisplayTag
 import com.grand.duke.elliot.restaurantpost.ui.fluid_content_resize.FluidContentResize
 import com.grand.duke.elliot.restaurantpost.ui.folder.DisplayFolderListDialogFragment
 import com.grand.duke.elliot.restaurantpost.ui.folder.FolderEditingDialogFragment
 import com.grand.duke.elliot.restaurantpost.ui.google_maps.GoogleMapsActivity
 import com.grand.duke.elliot.restaurantpost.ui.place.DisplayPlaceListDialogFragment
+import com.grand.duke.elliot.restaurantpost.ui.place.PlaceEditingDialogFragment
 import com.grand.duke.elliot.restaurantpost.ui.post.photo.PhotoHelper
 import com.grand.duke.elliot.restaurantpost.ui.post.photo.PhotoUriStringAdapter
 import com.grand.duke.elliot.restaurantpost.ui.tag.DisplayTagListDialogFragment
@@ -241,15 +243,27 @@ class WritingActivity: AppCompatActivity(),
         /** Place. */
         viewModel.place.observe(this@WritingActivity, {
             it?.run {
-                //binding.linearLayoutPlace.fadeIn(shortAnimationDuration)
+                /** Place != null */
+                if (binding.linearLayoutPlace.isVisible.not())
+                    binding.linearLayoutPlace.fadeIn(mediumAnimationDuration)
+
                 if (binding.chipPlace.isVisible.not())
                     binding.chipPlace.fadeIn(shortAnimationDuration)
+
+                binding.chipPlace.text = name
+                binding.chipPlace.setOnCloseIconClickListener {
+                    viewModel.setPlace(null)
+                }
                 updateMap(it)
             } ?: run {
+                /** Place == null */
+                if (binding.linearLayoutPlace.isVisible)
+                    binding.linearLayoutPlace.fadeOut(mediumAnimationDuration)
 
-                //binding.linearLayoutPlace.fadeOut(shortAnimationDuration)
-                //if (binding.chipPlace.isVisible) todo. test.
-                //  binding.chipPlace.fadeOut(shortAnimationDuration)
+                if (binding.chipPlace.isVisible.not())
+                    binding.chipPlace.fadeOut(shortAnimationDuration) {
+                        binding.chipPlace.text = blank
+                    }
             }
         })
     }
@@ -403,7 +417,6 @@ class WritingActivity: AppCompatActivity(),
         private fun initToolbar() {
             setSupportActionBar(binding.toolbar)
             supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
         }
     }
 
@@ -718,6 +731,9 @@ class WritingActivity: AppCompatActivity(),
                     is DisplayTag -> {
                         viewModel.addTag(item.tag)
                     }
+                    is DisplayPlace -> {
+                        viewModel.setPlace(item.place)
+                    }
                 }
             }
 
@@ -725,6 +741,7 @@ class WritingActivity: AppCompatActivity(),
                 when(item) {
                     is DisplayFolder -> viewModel.deleteFolder(item.folder)
                     is DisplayTag -> viewModel.deleteTag(item.tag)
+                    is DisplayPlace -> viewModel.deletePlace(item.place)
                 }
             }
 
@@ -739,6 +756,14 @@ class WritingActivity: AppCompatActivity(),
                     is DisplayTag -> {
                         TagEditingDialogFragment().apply {
                             setTag(item.tag.deepCopy())
+                            show(supportFragmentManager, tag)
+                        }
+                    }
+                    is DisplayPlace -> {
+                        val title = getString(R.string.edit_place)
+                        PlaceEditingDialogFragment().apply {
+                            setTitle(title)
+                            setPlace(item.place.deepCopy())
                             show(supportFragmentManager, tag)
                         }
                     }

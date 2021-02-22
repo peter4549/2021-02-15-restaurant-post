@@ -7,11 +7,13 @@ import android.content.pm.PackageManager
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
+import android.os.Parcelable
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.LocationServices
 import com.grand.duke.elliot.restaurantpost.R
 import com.grand.duke.elliot.restaurantpost.persistence.data.Place
 import com.grand.duke.elliot.restaurantpost.ui.util.roundTo
+import kotlinx.android.parcel.Parcelize
 import java.util.*
 
 class LocationHelper(private val activity: Context) {
@@ -53,8 +55,9 @@ class LocationHelper(private val activity: Context) {
     )
 }
 
+@Parcelize
 data class PlaceContent(
         val name: String,
         val latitude: Double,
         val longitude: Double
-)
+): Parcelable

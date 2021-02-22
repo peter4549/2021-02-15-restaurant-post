@@ -17,7 +17,7 @@ interface PostDao {
     fun insert(post: Post): Single<Long>
 
     @Delete
-    fun delete(post: Post)
+    fun delete(post: Post): Completable
 
     @Update
     fun update(post: Post): Completable

@@ -189,7 +189,7 @@ class WritingViewModel @AssistedInject constructor(
         _photoUriStringList.value = value
     }
 
-    fun setPlace(place: Place) {
+    fun setPlace(place: Place?) {
         _place.value = place
     }
 
@@ -200,6 +200,17 @@ class WritingViewModel @AssistedInject constructor(
 
             withContext(Dispatchers.IO) {
                 folderDao.delete(folder)
+            }
+        }
+    }
+
+    fun deletePlace(place: Place) {
+        viewModelScope.launch {
+            if (place.id == _place.value?.id)
+                _place.value = null
+
+            withContext(Dispatchers.IO) {
+                placeDao.delete(place)
             }
         }
     }

@@ -28,7 +28,7 @@ class DisplayPlaceListAdapter(private val useCheckBox: Boolean = false): SearchB
         if (useCheckBox) {
             viewHolder.binding.appCompatCheckBox.show()
             viewHolder.binding.appCompatCheckBox.setOnCheckedChangeListener { _, b ->
-                onPlaceCheckedChangeListener?.onPlaceCheckedChange(displayPlace.id, b)
+                onPlaceCheckedChangeListener?.onPlaceCheckedChange(displayPlace.place.id, b)
             }
         } else
             viewHolder.binding.appCompatCheckBox.hide()
@@ -40,7 +40,7 @@ class DisplayPlaceListAdapter(private val useCheckBox: Boolean = false): SearchB
 
         setTextWithSearchWordColorChange(
                 viewHolder.binding.textViewName,
-                displayPlace.name,
+                displayPlace.place.name,
                 searchWord,
                 MainApplication.themePrimaryColor
         )
@@ -60,7 +60,7 @@ class DisplayPlaceListAdapter(private val useCheckBox: Boolean = false): SearchB
     }
 
     override fun filter(searchBarListItem: SearchBarListItem<DisplayPlace>, searchWord: String): SearchBarListItem<DisplayPlace>? {
-        if (searchBarListItem.item.name.contains(searchWord))
+        if (searchBarListItem.item.place.name.contains(searchWord))
             return searchBarListItem
 
         return null

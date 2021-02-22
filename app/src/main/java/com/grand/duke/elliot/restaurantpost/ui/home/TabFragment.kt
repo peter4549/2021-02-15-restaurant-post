@@ -174,7 +174,7 @@ class TabFragment: BaseFragment<MainViewModel, FragmentTabDrawerBinding>() {
                     displayPlaceAdapter.submitItemList(it.map { placeWithPostList ->
                         val place = placeWithPostList.place
                         val postList = placeWithPostList.postList
-                        DisplayPlace(place.id, place.name, postList.count())
+                        DisplayPlace(place, postList.count())
                     })
                 }, {
                     Timber.e(it)

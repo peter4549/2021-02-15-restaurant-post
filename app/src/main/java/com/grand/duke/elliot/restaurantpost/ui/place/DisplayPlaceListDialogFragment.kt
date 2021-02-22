@@ -43,8 +43,7 @@ class DisplayPlaceListDialogFragment: SearchBarListDialogFragment<DisplayPlace>(
                 .subscribe({
                     displayPlaceListAdapter.submitItemList(it.map { placeWithPostList ->
                         DisplayPlace(
-                                placeWithPostList.place.id,
-                                placeWithPostList.place.name,
+                                placeWithPostList.place,
                                 placeWithPostList.postList.count()
                         )
                     })

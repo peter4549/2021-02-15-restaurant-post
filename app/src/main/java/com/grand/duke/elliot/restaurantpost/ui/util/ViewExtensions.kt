@@ -29,7 +29,7 @@ fun View.fadeIn(duration: Number) {
     }
 }
 
-fun View.fadeOut(duration: Number) {
+fun View.fadeOut(duration: Number, onAnimationEnd: (() -> Unit)? = null) {
     this.apply {
         alpha = 1F
         visibility = View.VISIBLE
@@ -40,6 +40,7 @@ fun View.fadeOut(duration: Number) {
             .setListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator?) {
                     this@fadeOut.visibility = View.GONE
+                    onAnimationEnd?.invoke()
                     super.onAnimationEnd(animation)
                 }
             })

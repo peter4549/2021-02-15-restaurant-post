@@ -1,15 +1,13 @@
 package com.grand.duke.elliot.restaurantpost.repository.data
 
-import androidx.room.ColumnInfo
+import com.grand.duke.elliot.restaurantpost.persistence.data.Place
 
 data class DisplayPlace (
-        @ColumnInfo(name = "place_id") val id: Long,
-        var name: String,
+        val place: Place,
         val postListCount: Int
 ) {
     fun deepCopy() = DisplayPlace(
-            id = this.id,
-            name = this.name,
+            place = this.place.deepCopy(),
             postListCount = this.postListCount
     )
 }
