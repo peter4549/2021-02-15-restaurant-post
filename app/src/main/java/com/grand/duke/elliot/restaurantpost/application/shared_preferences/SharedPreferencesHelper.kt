@@ -5,6 +5,9 @@ import android.content.Context
 import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import com.grand.duke.elliot.restaurantpost.R
+import com.grand.duke.elliot.restaurantpost.application.noFolderSelected
+import com.grand.duke.elliot.restaurantpost.application.noPlaceSelected
+import com.grand.duke.elliot.restaurantpost.ui.home.FilterOptions
 import javax.inject.Inject
 
 class SharedPreferencesHelper @Inject constructor(context: Context) {
@@ -21,6 +24,10 @@ class SharedPreferencesHelper @Inject constructor(context: Context) {
                 ".shared_preferences.key.primary_theme_color"
         const val CheckedTagIdSet = "com.grand.duke.elliot.restaurantpost.application.shared_preferences" +
                 ".shared_preferences.key.checked_tag_id_set"
+        const val SelectedFolderId = "com.grand.duke.elliot.restaurantpost.application.shared_preferences" +
+                ".shared_preferences.key.selected_folder_id"
+        const val SelectedPlaceId = "com.grand.duke.elliot.restaurantpost.application.shared_preferences" +
+                ".shared_preferences.key.selected_place_id"
     }
 
     private val themeColorSharedPreferences = context.getSharedPreferences(Name.ThemeColor, Context.MODE_PRIVATE)
@@ -36,10 +43,14 @@ class SharedPreferencesHelper @Inject constructor(context: Context) {
     fun getPrimaryThemeColor(): Int =
         themeColorSharedPreferences.getInt(Key.PrimaryThemeColor, defaultThemePrimaryColor)
 
-    fun putCheckedTagIdSet(checkedTagIdSet: Set<String>) {
-        filterSharedPreferences.edit().putStringSet(Key.CheckedTagIdSet, checkedTagIdSet).apply()
+    fun putFilterOptions(checkedTagIds: List<Long>) {
+
     }
 
     fun getCheckedTagIdSet(): Set<String> =
             filterSharedPreferences.getStringSet(Key.CheckedTagIdSet, setOf()) ?: setOf()
+
+    fun getSelectedFolderId(): Long = filterSharedPreferences.getLong(Key.SelectedFolderId, noFolderSelected)
+
+    fun getSelectedPlaceId(): Long = filterSharedPreferences.getLong(Key.SelectedPlaceId, noPlaceSelected)
 }

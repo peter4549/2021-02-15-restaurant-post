@@ -1,11 +1,14 @@
 package com.grand.duke.elliot.restaurantpost.persistence.data
 
 import android.net.Uri
+import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.android.parcel.Parcelize
 
 @Entity(tableName = "post")
+@Parcelize
 data class Post (
         @PrimaryKey(autoGenerate = true)
         @ColumnInfo(name = "post_id") val id: Long = 0L,
@@ -13,8 +16,8 @@ data class Post (
         @ColumnInfo(name = "folder_id") var folderId: Long,
         var modifiedTime: Long,
         var photoUriStringArray: Array<String>,
-        @ColumnInfo(name = "place_id") var placeId: Long,
-) {
+        @ColumnInfo(name = "place_id") var placeId: Long
+): Parcelable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

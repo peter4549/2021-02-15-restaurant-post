@@ -3,13 +3,10 @@ package com.grand.duke.elliot.restaurantpost.ui.post.writing
 import android.Manifest
 import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
-import android.util.DisplayMetrics
-import android.util.Size
 import android.util.TypedValue
-import android.view.Menu
-import android.view.MenuItem
-import android.view.WindowInsets
+import android.view.*
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -44,6 +41,7 @@ import com.grand.duke.elliot.restaurantpost.ui.folder.FolderEditingDialogFragmen
 import com.grand.duke.elliot.restaurantpost.ui.google_maps.GoogleMapsActivity
 import com.grand.duke.elliot.restaurantpost.ui.place.DisplayPlaceListDialogFragment
 import com.grand.duke.elliot.restaurantpost.ui.place.PlaceEditingDialogFragment
+import com.grand.duke.elliot.restaurantpost.ui.post.list.PostListFragment
 import com.grand.duke.elliot.restaurantpost.ui.post.photo.PhotoHelper
 import com.grand.duke.elliot.restaurantpost.ui.post.photo.PhotoUriStringAdapter
 import com.grand.duke.elliot.restaurantpost.ui.tag.DisplayTagListDialogFragment
@@ -112,11 +110,14 @@ class WritingActivity: AppCompatActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
-
         super.onCreate(savedInstanceState)
+
+        val post = intent.getParcelableExtra<Post>(PostListFragment.ExtraName.Post)
+
         binding = DataBindingUtil.setContentView(this, R.layout.activity_writing)
-        viewModel = viewModelFactory.create(null, localRepository)
+        viewModel = viewModelFactory.create(post, localRepository)
         init()
+        setFrameLayoutSpaceHeight()
     }
 
     override fun onResume() {
@@ -142,7 +143,6 @@ class WritingActivity: AppCompatActivity(),
         uiController.init()
 
         initLiveData()
-        setFrameLayoutSpaceHeight()
     }
 
     private fun initLiveData() {
@@ -151,13 +151,17 @@ class WritingActivity: AppCompatActivity(),
                 uiController.initViewPager()
 
             if (photoUriStringList.isEmpty()) {
+                binding.toolbar.setBackgroundColor(MainApplication.themePrimaryColor)
                 binding.relativeLayoutViewPager.hide()
 
                 if (binding.viewAnchor.isVisible.not())
                     binding.viewAnchor.show()
             } else {
-                if (binding.relativeLayoutViewPager.isVisible.not())
+                if (binding.relativeLayoutViewPager.isVisible.not()) {
+                    binding.toolbar.setBackgroundColor(Color.TRANSPARENT)
+                    binding.toolbar.invalidate()
                     binding.relativeLayoutViewPager.show()
+                }
 
                 if (binding.viewAnchor.isVisible)
                     binding.viewAnchor.hide()
@@ -300,7 +304,6 @@ class WritingActivity: AppCompatActivity(),
 
     override fun onMapReady(googleMap: GoogleMap?) {
         this.googleMap = googleMap
-        uiController.initMap()
     }
 
     private inner class UiController {
@@ -311,9 +314,10 @@ class WritingActivity: AppCompatActivity(),
             initObservableScrollView()
             initViewPager()
             initToolbar()
+            initMap()
         }
 
-        fun initMap() {
+        private fun initMap() {
             val supportMapFragment = supportFragmentManager.findFragmentById(R.id.fragment_container_view_support_map) as SupportMapFragment
             supportMapFragment.getMapAsync(this@WritingActivity)
         }
@@ -338,6 +342,8 @@ class WritingActivity: AppCompatActivity(),
         fun setText() {
             binding.textViewDate.text = viewModel.modifiedTime.toSimpleDateFormat(getString(R.string.pattern_date))
             binding.textViewTime.text = viewModel.modifiedTime.toSimpleDateFormat(getString(R.string.pattern_time))
+
+            binding.editTextDescription.setText(viewModel.post?.description ?: blank)
         }
 
         private fun initBottomSheet() {
@@ -471,47 +477,26 @@ class WritingActivity: AppCompatActivity(),
     }
 
     private fun setFrameLayoutSpaceHeight() {
-        binding.constraintLayoutContent.post {
+        binding.frameLayout.post {
             run {
-                binding.viewAnchor.post {
-                    val height = screenHeight() - binding.constraintLayoutContent.height
+                binding.observableScrollView.post {
+                        binding.relativeLayoutViewPager.post {
+                            binding.frameLayoutSpace.post {
+                                var height = binding.frameLayout.height - binding.observableScrollView.height
 
-                    binding.frameLayoutSpace.post {
-                        val params = binding.frameLayoutSpace.layoutParams
-                        params.height = height
-                        binding.frameLayoutSpace.layoutParams = params
-                    }
+                                if (viewModel.post?.photoUriStringArray.isNullOrEmpty().not())
+                                    height += resources.getDimension(R.dimen.parallax_image_height).toInt() -
+                                            actionBarSize().toPx().toInt() +
+                                            resources.getDimension(R.dimen.spacing_small).toInt()
+
+                                val params = binding.frameLayoutSpace.layoutParams
+                                params.height = height
+                                binding.frameLayoutSpace.layoutParams = params
+                                Timber.d("binding.frameLayoutSpace.height: $height")
+                            }
+                        }
                 }
             }
-        }
-    }
-
-    private fun screenHeight(): Int {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-            val metrics = windowManager.currentWindowMetrics
-            val windowInsets = metrics.windowInsets
-            val insets = windowInsets.getInsetsIgnoringVisibility(
-                WindowInsets.Type.navigationBars()
-                        or WindowInsets.Type.displayCutout()
-            )
-
-            val insetsWidth: Int = insets.right + insets.left
-            val insetsHeight: Int = insets.top + insets.bottom
-
-            val bounds = metrics.bounds
-            val size = Size(
-                bounds.width() - insetsWidth,
-                bounds.height() - insetsHeight
-            )
-
-            return size.height
-        } else {
-            val displayMetrics = DisplayMetrics()
-            @Suppress("DEPRECATION")
-            val display = windowManager.defaultDisplay
-            @Suppress("DEPRECATION")
-            display.getMetrics(displayMetrics)
-            return displayMetrics.heightPixels
         }
     }
 
@@ -548,17 +533,17 @@ class WritingActivity: AppCompatActivity(),
                 return false
             }
             WritingViewModel.Mode.Edit -> {
-                viewModel.post()?.let {
-                    if (viewModel.existingPhotoUriArray().contentEquals(viewModel.photoUriList()?.toTypedArray()).not())
+                viewModel.post?.let {
+                    if (viewModel.existingPhotoUriArray().contentEquals(viewModel.photoUriList().toTypedArray()).not())
                         return true
 
                     if (it.description != binding.editTextDescription.text.toString())
                         return true
 
-                    if (viewModel.existingFolderId() != viewModel.folder()?.id)
+                    if (viewModel.existingFolderId() != viewModel.folder()?.id ?: noFolderSelected)
                         return true
 
-                    if (viewModel.existingPlaceId() != viewModel.place()?.id)
+                    if (viewModel.existingPlaceId() != viewModel.place()?.id ?: noPlaceSelected)
                         return true
 
                     if (viewModel.existingTagArray().contentEquals(viewModel.tagList().toTypedArray()).not())
@@ -591,9 +576,8 @@ class WritingActivity: AppCompatActivity(),
     }
 
     private fun finishWithUpdate() {
-        val post = viewModel.post()
         val text = getString(R.string.post_update_failed)
-        post?.let {
+        viewModel.post?.let {
             viewModel.updatePost(it) { throwable ->
                 throwable?.let { showToast(text) }
                 finish()

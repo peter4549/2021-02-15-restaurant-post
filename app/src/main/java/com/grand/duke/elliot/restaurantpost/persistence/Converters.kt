@@ -16,6 +16,12 @@ class Converters {
     fun jsonToStringArray(value: String): Array<String> = gson.fromJson(value, Array<String>::class.java)
 
     @TypeConverter
+    fun longArrayToJson(value: Array<Long>): String = gson.toJson(value)
+
+    @TypeConverter
+    fun jsonToLongArray(value: String): Array<Long> = gson.fromJson(value, Array<Long>::class.java)
+
+    @TypeConverter
     fun placeToJson(value: Place): String = gson.toJson(value)
 
     @TypeConverter

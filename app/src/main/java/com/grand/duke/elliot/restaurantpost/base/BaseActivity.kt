@@ -2,7 +2,10 @@ package com.grand.duke.elliot.restaurantpost.base
 
 import android.content.DialogInterface
 import android.os.Bundle
+import android.transition.Explode
+import android.view.Window
 import android.widget.Toast
+import androidx.annotation.CallSuper
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
@@ -26,9 +29,17 @@ abstract class BaseActivity<viewModel: ViewModel, viewDataBinding: ViewDataBindi
 
     protected abstract fun viewModel(): Class<viewModel>
 
+    @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
+
+        with(window) {
+            supportRequestWindowFeature(Window.FEATURE_CONTENT_TRANSITIONS)
+            enterTransition = Explode()
+            exitTransition = Explode()
+        }
+
         viewModel = ViewModelProvider(viewModelStore, viewModelFactory).get(viewModel())
         viewDataBinding = DataBindingUtil.setContentView(this, layoutRes)
     }

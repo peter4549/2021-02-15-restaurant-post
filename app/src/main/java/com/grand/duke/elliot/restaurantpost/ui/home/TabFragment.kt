@@ -34,15 +34,20 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.tab_navigation_view.view.*
 import timber.log.Timber
 
-class TabFragment: BaseFragment<MainViewModel, FragmentTabDrawerBinding>() {
+class TabFragment: BaseFragment<MainViewModel, FragmentTabDrawerBinding>(),
+        DisplayPlaceListAdapter.OnPlaceCheckedChangeListener, DisplayTagListAdapter.OnTagCheckedChangeListener {
 
     private lateinit var uiController: UiController
     private val compositeDisposable by lazy {
         CompositeDisposable()
     }
     private val displayFolderListAdapter = DisplayFolderListAdapter()
-    private val displayPlaceAdapter = DisplayPlaceListAdapter(true)
-    private val displayTagListAdapter = DisplayTagListAdapter(true)
+    private val displayPlaceAdapter = DisplayPlaceListAdapter(true).apply {
+        setOnPlaceCheckedChangeListener(this@TabFragment)
+    }
+    private val displayTagListAdapter = DisplayTagListAdapter(true).apply {
+        setOnTagCheckedChangeListener(this@TabFragment)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -208,4 +213,14 @@ class TabFragment: BaseFragment<MainViewModel, FragmentTabDrawerBinding>() {
         get() = R.layout.fragment_tab_drawer
 
     override fun viewModel(): Class<MainViewModel> = MainViewModel::class.java
+
+    /** DisplayPlaceListAdapter.OnPlaceCheckedChangeListener. */
+    override fun onPlaceCheckedChange(id: Long, isChecked: Boolean) {
+
+    }
+
+    /** DisplayTagListAdapter.OnTagCheckedChangeListener. */
+    override fun onTagCheckedChange(id: Long, isChecked: Boolean) {
+
+    }
 }

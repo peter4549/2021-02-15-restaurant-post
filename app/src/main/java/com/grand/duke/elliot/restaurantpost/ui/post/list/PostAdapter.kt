@@ -1,24 +1,49 @@
 package com.grand.duke.elliot.restaurantpost.ui.post.list
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.grand.duke.elliot.restaurantpost.R
+import com.grand.duke.elliot.restaurantpost.databinding.ItemDateBinding
 import com.grand.duke.elliot.restaurantpost.databinding.ItemFramePostBinding
 import com.grand.duke.elliot.restaurantpost.persistence.data.Post
+import com.grand.duke.elliot.restaurantpost.ui.util.blank
 import com.grand.duke.elliot.restaurantpost.ui.util.hide
 import com.grand.duke.elliot.restaurantpost.ui.util.show
+import com.grand.duke.elliot.restaurantpost.ui.util.toSimpleDateFormat
 import java.lang.IllegalArgumentException
 
 class PostAdapter: ListAdapter<AdapterItem, PostAdapter.ViewHolder>(PostDiffCallback()) {
 
-    class ViewHolder(private val binding: ViewDataBinding): RecyclerView.ViewHolder(binding.root) {
+    private var onItemClickListener: OnItemClickListener? = null
+    private var recyclerView: RecyclerView? = null
+
+    fun setOnItemClickListener(onItemClickListener: OnItemClickListener) {
+        this.onItemClickListener = onItemClickListener
+    }
+
+    interface OnItemClickListener {
+        fun onItemClick(holder: ViewHolder, post: Post)
+    }
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        this.recyclerView = recyclerView
+    }
+
+    inner class ViewHolder(val binding: ViewDataBinding): RecyclerView.ViewHolder(binding.root) {
+
         fun bind(adapterItem: AdapterItem) {
             when(adapterItem) {
-                is AdapterItem.Header -> {}
-                is AdapterItem.DataItem -> {
+                is AdapterItem.DateItem -> {
+                    binding as ItemDateBinding
+                    binding.textView.text = adapterItem.dateString
+                }
+                is AdapterItem.PostItem -> {
                     binding as ItemFramePostBinding
                     val post = adapterItem.post
 
@@ -32,6 +57,10 @@ class PostAdapter: ListAdapter<AdapterItem, PostAdapter.ViewHolder>(PostDiffCall
                     }
 
                     binding.textViewTitle.text = post.description
+
+                    binding.root.setOnClickListener {
+                        onItemClickListener?.onItemClick(this, post)
+                    }
                 }
             }
         }
@@ -44,25 +73,33 @@ class PostAdapter: ListAdapter<AdapterItem, PostAdapter.ViewHolder>(PostDiffCall
 
     object ViewType {
         const val Data = 0
-        const val Header = 1
+        const val Date = 1
     }
 
-    fun setViewMode() {
+    fun submitPostList(list: List<Post>, context: Context) {
+        val adapterItemList = ArrayList<AdapterItem>()
+        var dateString = blank
 
-    }
+        for ((index, item) in list.withIndex()) {
+            val new = item.modifiedTime.toSimpleDateFormat(context.getString(R.string.pattern_year_month))
 
-    fun submitDataList(list: List<Post>) {
-        // TODO add header, date logic needed..
+            if (new != dateString) {
+                dateString = new
+                adapterItemList.add(AdapterItem.DateItem(-index.toLong(), dateString))
+            }
 
-        val adapterItemList = list.map { AdapterItem.DataItem(it) }
+            adapterItemList.add(AdapterItem.PostItem(item))
+        }
+
+        recyclerView?.scheduleLayoutAnimation()
 
         super.submitList(adapterItemList)
     }
 
     override fun getItemViewType(position: Int): Int {
         return when (getItem(position)) {
-            is AdapterItem.DataItem -> ViewType.Data
-            is AdapterItem.Header -> ViewType.Header
+            is AdapterItem.PostItem -> ViewType.Data
+            is AdapterItem.DateItem -> ViewType.Date
             else -> throw IllegalArgumentException("Invalid item.")
         }
     }
@@ -72,6 +109,7 @@ class PostAdapter: ListAdapter<AdapterItem, PostAdapter.ViewHolder>(PostDiffCall
 
         val binding = when(viewType) {
             ViewType.Data -> ItemFramePostBinding.inflate(layoutInflater, parent, false)
+            ViewType.Date -> ItemDateBinding.inflate(layoutInflater, parent, false)
             else -> throw IllegalArgumentException("Invalid viewType.")
         }
 
@@ -94,13 +132,14 @@ class PostDiffCallback: DiffUtil.ItemCallback<AdapterItem>() {
 }
 
 sealed class AdapterItem {
-    data class DataItem(val post: Post): AdapterItem() {
+    data class PostItem(val post: Post): AdapterItem() {
         override val id = post.id
     }
 
-    object Header: AdapterItem() {
-        override val id = Long.MIN_VALUE
-    }
+    data class DateItem(
+            override val id: Long,
+            val dateString: String
+    ): AdapterItem()
 
     abstract val id: Long
 }

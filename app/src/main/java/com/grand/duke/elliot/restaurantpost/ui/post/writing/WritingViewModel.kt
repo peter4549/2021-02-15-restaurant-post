@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.grand.duke.elliot.restaurantpost.application.noFolderSelected
+import com.grand.duke.elliot.restaurantpost.application.noPlaceSelected
 import com.grand.duke.elliot.restaurantpost.persistence.data.*
 import com.grand.duke.elliot.restaurantpost.repository.LocalRepository
 import com.grand.duke.elliot.restaurantpost.ui.util.difference
@@ -21,7 +22,7 @@ import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 class WritingViewModel @AssistedInject constructor(
-        @Assisted private val post: Post?,
+        @Assisted val post: Post?,
         @Assisted private val localRepository: LocalRepository
 ): ViewModel() {
 
@@ -48,15 +49,13 @@ class WritingViewModel @AssistedInject constructor(
 
     fun mode() = mode
 
-    fun post() = post
-
     val modifiedTime: Long = post?.modifiedTime ?: System.currentTimeMillis()
 
     private val _folder = MutableLiveData<Folder?>(null)
     val folder: LiveData<Folder?>
         get() = _folder
 
-    private val existingFolderId = post?.folderId
+    private val existingFolderId = post?.folderId ?: noFolderSelected
 
     fun existingFolderId() = existingFolderId
     fun folder() = _folder.value
@@ -65,7 +64,11 @@ class WritingViewModel @AssistedInject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 post?.let {
-                    _folder.value = folderDao.folder(it.folderId)
+                    val folder = folderDao.folder(it.folderId)
+
+                    withContext(Dispatchers.Main) {
+                        _folder.value = folder
+                    }
                 }
             }
         }
@@ -79,14 +82,22 @@ class WritingViewModel @AssistedInject constructor(
     val place: LiveData<Place?>
         get() = _place
 
-    private val existingPlaceId: Long? = post?.placeId
+    private val existingPlaceId: Long = post?.placeId ?: noPlaceSelected
 
     fun existingPlaceId() = existingPlaceId
     fun place() = _place.value
 
     init {
-        post?.let {
-            _place.value = placeDao.get(it.placeId)
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                post?.let {
+                    val place = placeDao.get(it.placeId)
+
+                    withContext(Dispatchers.Main) {
+                        _place.value = place
+                    }
+                }
+            }
         }
     }
 
@@ -131,11 +142,14 @@ class WritingViewModel @AssistedInject constructor(
                     existingTagArray = postTagCrossRefDao
                             .getPostWithTagList(post.id)?.tagList?.toTypedArray() ?: arrayOf()
                     existingTagArray.forEach { value.add(it.deepCopy()) }
-                    _displayTagList.value = DisplayTagList(
-                            changedTag = null,
-                            changeType = DisplayTagList.ChangeType.Initialized,
-                            tagList = value
-                    )
+
+                    withContext(Dispatchers.Main) {
+                        _displayTagList.value = DisplayTagList(
+                                changedTag = null,
+                                changeType = DisplayTagList.ChangeType.Initialized,
+                                tagList = value
+                        )
+                    }
                 }
             }
         }
