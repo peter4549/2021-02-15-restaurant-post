@@ -22,7 +22,6 @@
                 android:id="@+id/navigation_view_layout"
                 layout="@layout/tab_navigation_view" />
 
-
         </com.google.android.material.navigation.NavigationView>
     </androidx.drawerlayout.widget.DrawerLayout>
 </layout>

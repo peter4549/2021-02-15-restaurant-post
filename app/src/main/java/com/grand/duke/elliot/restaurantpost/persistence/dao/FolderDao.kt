@@ -23,5 +23,5 @@ interface FolderDao {
     fun update(folder: Folder): Completable
 
     @Query("SELECT * FROM folder WHERE folder_id = :id ")
-    suspend fun folder(id: Long): Folder
+    suspend fun get(id: Long): Folder
 }

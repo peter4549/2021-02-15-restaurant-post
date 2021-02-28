@@ -64,7 +64,7 @@ class WritingViewModel @AssistedInject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 post?.let {
-                    val folder = folderDao.folder(it.folderId)
+                    val folder = folderDao.get(it.folderId)
 
                     withContext(Dispatchers.Main) {
                         _folder.value = folder

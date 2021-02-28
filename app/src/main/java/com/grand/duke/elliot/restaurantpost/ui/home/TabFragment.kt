@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.annotation.ColorRes
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.ListAdapter
@@ -27,7 +28,11 @@ import com.grand.duke.elliot.restaurantpost.ui.place.DisplayPlaceListAdapter
 import com.grand.duke.elliot.restaurantpost.ui.post.list.PostListFragment
 import com.grand.duke.elliot.restaurantpost.ui.post.writing.WritingActivity
 import com.grand.duke.elliot.restaurantpost.ui.tag.DisplayTagListAdapter
+import com.grand.duke.elliot.restaurantpost.ui.util.collapse
+import com.grand.duke.elliot.restaurantpost.ui.util.dialog_fragment.SearchBarListAdapter
 import com.grand.duke.elliot.restaurantpost.ui.util.dialog_fragment.SearchBarListItem
+import com.grand.duke.elliot.restaurantpost.ui.util.expand
+import com.grand.duke.elliot.restaurantpost.ui.util.rotate
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -35,18 +40,26 @@ import kotlinx.android.synthetic.main.tab_navigation_view.view.*
 import timber.log.Timber
 
 class TabFragment: BaseFragment<MainViewModel, FragmentTabDrawerBinding>(),
-        DisplayPlaceListAdapter.OnPlaceCheckedChangeListener, DisplayTagListAdapter.OnTagCheckedChangeListener {
+        DisplayTagListAdapter.OnTagCheckedChangeListener {
+
+    override val useSharedViewModel: Boolean
+        get() = true
 
     private lateinit var uiController: UiController
     private val compositeDisposable by lazy {
         CompositeDisposable()
     }
     private val displayFolderListAdapter = DisplayFolderListAdapter()
-    private val displayPlaceAdapter = DisplayPlaceListAdapter(true).apply {
-        setOnPlaceCheckedChangeListener(this@TabFragment)
-    }
+    private val displayPlaceAdapter = DisplayPlaceListAdapter(false)
     private val displayTagListAdapter = DisplayTagListAdapter(true).apply {
         setOnTagCheckedChangeListener(this@TabFragment)
+    }
+
+    private var shortAnimationDuration = 0
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
     }
 
     override fun onCreateView(
@@ -55,9 +68,13 @@ class TabFragment: BaseFragment<MainViewModel, FragmentTabDrawerBinding>(),
         savedInstanceState: Bundle?
     ): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
+
         uiController = UiController(viewDataBinding)
         uiController.init()
+
+        initAdapter()
         initFlowable()
+
         return view
     }
 
@@ -122,7 +139,15 @@ class TabFragment: BaseFragment<MainViewModel, FragmentTabDrawerBinding>(),
                                     title = getString(R.string.folder),
                                     iconColor = getColor(R.color.color_icon),
                                     iconResourceId = R.drawable.ic_round_folder_24,
-                                    onHeaderClick = null, // todo imp.
+                                    onHeaderClick = { binding ->
+                                        if (binding.recyclerView.isVisible) {
+                                            binding.imageArrowDropDown.rotate(180F, 200)
+                                            binding.recyclerView.collapse(0, shortAnimationDuration.toLong())
+                                        } else {
+                                            binding.imageArrowDropDown.rotate(0F, 200)
+                                            binding.recyclerView.expand(shortAnimationDuration.toLong())
+                                        }
+                                    },
                                     onMoreIconClick = null // todo imp.
                             ),
                             DrawerItem.ListItem(
@@ -131,7 +156,15 @@ class TabFragment: BaseFragment<MainViewModel, FragmentTabDrawerBinding>(),
                                     title = getString(R.string.tag),
                                     iconColor = getColor(R.color.color_icon),
                                     iconResourceId = R.drawable.ic_round_tag_24,
-                                    onHeaderClick = null, // todo imp.
+                                    onHeaderClick = { binding ->
+                                        if (binding.recyclerView.isVisible) {
+                                            binding.imageArrowDropDown.rotate(180F, 200)
+                                            binding.recyclerView.collapse(0, shortAnimationDuration.toLong())
+                                        } else {
+                                            binding.imageArrowDropDown.rotate(0F, 200)
+                                            binding.recyclerView.expand(shortAnimationDuration.toLong())
+                                        }
+                                    },
                                     onMoreIconClick = null // todo imp.
                             ),
                             DrawerItem.ListItem(
@@ -140,7 +173,15 @@ class TabFragment: BaseFragment<MainViewModel, FragmentTabDrawerBinding>(),
                                     title = getString(R.string.place),
                                     iconColor = getColor(R.color.color_icon),
                                     iconResourceId = R.drawable.ic_round_location_on_24,
-                                    onHeaderClick = null, // todo imp.
+                                    onHeaderClick = { binding ->
+                                        if (binding.recyclerView.isVisible) {
+                                            binding.imageArrowDropDown.rotate(180F, 200)
+                                            binding.recyclerView.collapse(0, shortAnimationDuration.toLong())
+                                        } else {
+                                            binding.imageArrowDropDown.rotate(0F, 200)
+                                            binding.recyclerView.expand(shortAnimationDuration.toLong())
+                                        }
+                                    },
                                     onMoreIconClick = null // todo imp.
                             )
                     )
@@ -186,6 +227,36 @@ class TabFragment: BaseFragment<MainViewModel, FragmentTabDrawerBinding>(),
                 }))
     }
 
+    private fun initAdapter() {
+        displayFolderListAdapter.setOnItemClickListener(object : SearchBarListAdapter.OnItemClickListener<DisplayFolder> {
+            override fun onDeleteClick(item: DisplayFolder) {
+
+            }
+
+            override fun onEditClick(item: DisplayFolder) {
+
+            }
+
+            override fun onItemClick(item: DisplayFolder, adapterPosition: Int) {
+                viewModel.setSelectedFolder(item.folder)
+            }
+        })
+
+        displayPlaceAdapter.setOnItemClickListener(object : SearchBarListAdapter.OnItemClickListener<DisplayPlace> {
+            override fun onDeleteClick(item: DisplayPlace) {
+
+            }
+
+            override fun onEditClick(item: DisplayPlace) {
+
+            }
+
+            override fun onItemClick(item: DisplayPlace, adapterPosition: Int) {
+                viewModel.setSelectedPlace(item.place)
+            }
+        })
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         compositeDisposable.clear()
@@ -214,13 +285,8 @@ class TabFragment: BaseFragment<MainViewModel, FragmentTabDrawerBinding>(),
 
     override fun viewModel(): Class<MainViewModel> = MainViewModel::class.java
 
-    /** DisplayPlaceListAdapter.OnPlaceCheckedChangeListener. */
-    override fun onPlaceCheckedChange(id: Long, isChecked: Boolean) {
-
-    }
-
     /** DisplayTagListAdapter.OnTagCheckedChangeListener. */
     override fun onTagCheckedChange(id: Long, isChecked: Boolean) {
-
+        viewModel.addTagWithPostList(id)
     }
 }

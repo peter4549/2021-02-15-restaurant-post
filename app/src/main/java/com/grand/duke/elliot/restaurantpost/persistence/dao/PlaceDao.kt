@@ -23,7 +23,7 @@ interface PlaceDao {
     fun update(place: Place): Completable
 
     @Query("SELECT * FROM place WHERE place_id = :id LIMIT 1")
-    fun get(id: Long): Place?
+    suspend fun get(id: Long): Place?
 
     @Query("SELECT name, latitude, longitude FROM place")
     suspend fun getAllPlaceContentList(): List<PlaceContent>

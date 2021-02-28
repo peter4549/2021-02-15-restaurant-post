@@ -23,8 +23,12 @@ interface PostTagCrossRefDao {
     fun getTagWithPostLists(): Flowable<List<TagWithPostList>>
 
     @Transaction
+    @Query("SELECT * FROM tag WHERE tag_id = :tagId")
+    fun getTagWithPostListByTagId(tagId: Long): TagWithPostList
+
+    @Transaction
     @Query("SELECT * FROM tag WHERE tag_id IN (:tagIdSet)")
-    fun getTagWithPostListsByTagIdList(tagIdSet: Set<Long>): List<TagWithPostList>
+    fun getTagWithPostListsByTagIdSet(tagIdSet: Set<Long>): List<TagWithPostList>
 
     @Transaction
     @Query("SELECT * FROM post ORDER BY modifiedTime DESC")

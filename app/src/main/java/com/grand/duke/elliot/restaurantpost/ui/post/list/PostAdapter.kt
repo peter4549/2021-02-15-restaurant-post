@@ -81,7 +81,7 @@ class PostAdapter: ListAdapter<AdapterItem, PostAdapter.ViewHolder>(PostDiffCall
         var dateString = blank
 
         for ((index, item) in list.withIndex()) {
-            val new = item.modifiedTime.toSimpleDateFormat(context.getString(R.string.pattern_year_month))
+            val new = item.modifiedTime.toSimpleDateFormat(context.getString(R.string.pattern_year_month_date))
 
             if (new != dateString) {
                 dateString = new

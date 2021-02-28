@@ -38,6 +38,10 @@ class DrawerItemAdapter(private val drawerItemList: ArrayList<DrawerItem>):
                         layoutManager = LinearLayoutManager(binding.root.context)
                         adapter = drawerItem.adapter
                     }
+
+                    binding.linearLayoutHeader.setOnClickListener {
+                        drawerItem.onHeaderClick?.invoke(binding)
+                    }
                 }
                 is DrawerItem.SubtitleItem -> {
                     binding as ItemDrawerSubtitleBinding

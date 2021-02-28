@@ -3,5 +3,5 @@
     <string name="pattern_month_date">M월 d일</string>
     <string name="pattern_date">M월 d일 EEEE</string>
     <string name="pattern_time">aa h시 m분</string>
-    <string name="pattern_year_month">yyyy년 M월</string>
+    <string name="pattern_year_month_date">yyyy년 M월 d일</string>
 </resources>

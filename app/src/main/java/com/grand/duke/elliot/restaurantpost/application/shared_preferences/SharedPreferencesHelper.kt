@@ -1,13 +1,11 @@
 package com.grand.duke.elliot.restaurantpost.application.shared_preferences
 
-import android.app.Application
 import android.content.Context
 import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import com.grand.duke.elliot.restaurantpost.R
 import com.grand.duke.elliot.restaurantpost.application.noFolderSelected
 import com.grand.duke.elliot.restaurantpost.application.noPlaceSelected
-import com.grand.duke.elliot.restaurantpost.ui.home.FilterOptions
 import javax.inject.Inject
 
 class SharedPreferencesHelper @Inject constructor(context: Context) {

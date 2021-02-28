@@ -31,7 +31,8 @@
     <string name="tag">태그</string>
 
     <!-- SearchBarListDialogFragment. -->
-    <string name="no_folder">폴더가 없습니다.</string>
+    <string name="no_folder">폴더 없음</string>
+    <string name="no_place">장소 없음</string>
 
     <!-- DisplayFolderListDialogFragment. -->
     <string name="folder">폴더</string>

@@ -524,12 +524,6 @@ class WritingActivity: AppCompatActivity(),
                 if (binding.editTextDescription.text.toString().isNotBlank())
                     return true
 
-                if (viewModel.folder() != null)
-                    return true
-
-                if (viewModel.tagList().isNotEmpty())
-                    return true
-
                 return false
             }
             WritingViewModel.Mode.Edit -> {

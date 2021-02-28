@@ -11,8 +11,11 @@ import androidx.annotation.LayoutRes
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
+import com.grand.duke.elliot.restaurantpost.ui.home.MainViewModel
 import dagger.android.support.AndroidSupportInjection
 import javax.inject.Inject
 
@@ -23,6 +26,8 @@ abstract class BaseFragment<viewModel: ViewModel, viewDataBinding: ViewDataBindi
 
     protected lateinit var viewModel: viewModel
     protected lateinit var viewDataBinding: viewDataBinding
+
+    protected abstract val useSharedViewModel: Boolean
 
     @get:LayoutRes
     protected abstract val layoutRes: Int
@@ -36,7 +41,11 @@ abstract class BaseFragment<viewModel: ViewModel, viewDataBinding: ViewDataBindi
 
     @CallSuper
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        viewModel = ViewModelProvider(viewModelStore, viewModelFactory).get(viewModel())
+        viewModel = if (useSharedViewModel)
+            requireActivity().run { ViewModelProviders.of(this)[viewModel()] }
+        else
+            ViewModelProvider(viewModelStore, viewModelFactory).get(viewModel())
+
         viewDataBinding = DataBindingUtil.inflate(inflater, layoutRes, container, false)
         return viewDataBinding.root
     }

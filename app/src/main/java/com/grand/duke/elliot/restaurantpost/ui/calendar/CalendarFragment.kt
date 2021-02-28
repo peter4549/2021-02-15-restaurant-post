@@ -23,6 +23,9 @@ import java.time.format.TextStyle
 import java.util.*
 
 class CalendarFragment: BaseFragment<CalendarViewModel, FragmentCalendarBinding>() {
+    override val useSharedViewModel: Boolean
+        get() = false
+
     override val layoutRes: Int
         get() = R.layout.fragment_calendar
 

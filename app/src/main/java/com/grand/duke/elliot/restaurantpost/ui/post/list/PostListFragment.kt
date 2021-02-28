@@ -20,6 +20,9 @@ import io.reactivex.disposables.CompositeDisposable
 
 class PostListFragment: BaseFragment<MainViewModel, FragmentPostListBinding>() {
 
+    override val useSharedViewModel: Boolean
+        get() = true
+
     object ExtraName {
         const val Post = "com.grand.duke.elliot.restaurantpost.ui.post.list" +
                 ".post_list_fragment.extra_name.post"
@@ -63,11 +66,26 @@ class PostListFragment: BaseFragment<MainViewModel, FragmentPostListBinding>() {
         }
 
         /** LiveData. */
-        viewModel.postList.observe(viewLifecycleOwner, {
-            postAdapter.submitPostList(it, requireContext())
-        })
+        initLiveData()
 
         return view
+    }
+
+    private fun initLiveData() {
+        viewModel.postList.observe(viewLifecycleOwner, {
+            it?.let {
+                postAdapter.submitPostList(viewModel.filterPostList(it), requireContext())
+            }
+        })
+
+        viewModel.selectedFolder.observe(viewLifecycleOwner, {
+
+        })
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.invalidateLiveData()
     }
 
     override fun onDestroyView() {

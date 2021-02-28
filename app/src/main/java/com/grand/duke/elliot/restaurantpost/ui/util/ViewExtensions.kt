@@ -79,7 +79,7 @@ fun View.rotate(
         .start()
 }
 
-fun View.expand() {
+fun View.expand(duration: Long) {
     val matchParentMeasureSpec: Int = View.MeasureSpec.makeMeasureSpec(
             (this.parent as View).width,
             View.MeasureSpec.EXACTLY
@@ -118,12 +118,12 @@ fun View.expand() {
 
     // 1dp/ms expansion rate
     //animation.duration = (targetHeight / this.context.resources.displayMetrics.density).toLong()
-    animation.duration = 300L
+    animation.duration = duration
     this.fadeIn(animation.duration)
     this.startAnimation(animation)
 }
 
-fun View.collapse(targetHeight: Int) {
+fun View.collapse(targetHeight: Int, duration: Long) {
     val initialHeight: Int = this.measuredHeight
     val animation: Animation = object : Animation() {
         override fun applyTransformation(
@@ -151,7 +151,7 @@ fun View.collapse(targetHeight: Int) {
     // 1dp/ms collapse rate
     // animation.duration = (initialHeight / this.context.resources.displayMetrics.density).toLong()
 
-    animation.duration = 300L
+    animation.duration = duration
     this.fadeOut(animation.duration)
     this.startAnimation(animation)
 }

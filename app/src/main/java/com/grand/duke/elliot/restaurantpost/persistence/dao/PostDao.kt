@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.grand.duke.elliot.restaurantpost.persistence.data.Post
 import io.reactivex.Completable
+import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
 
@@ -11,7 +12,7 @@ import io.reactivex.Single
 interface PostDao {
 
     @Query("SELECT * FROM post ORDER BY modifiedTime DESC")
-    fun getAll(): LiveData<List<Post>>
+    fun getAll(): Flowable<List<Post>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(post: Post): Single<Long>

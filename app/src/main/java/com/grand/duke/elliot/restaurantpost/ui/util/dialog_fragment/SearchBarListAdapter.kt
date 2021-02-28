@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.grand.duke.elliot.restaurantpost.R
 import com.grand.duke.elliot.restaurantpost.databinding.ItemListBinding
+import com.grand.duke.elliot.restaurantpost.ui.home.TabFragment
 import com.grand.duke.elliot.restaurantpost.ui.util.blank
 
 abstract class SearchBarListAdapter<T>: ListAdapter<SearchBarListItem<T>, SearchBarListAdapter.ViewHolder>(DiffCallback<T>()) {
