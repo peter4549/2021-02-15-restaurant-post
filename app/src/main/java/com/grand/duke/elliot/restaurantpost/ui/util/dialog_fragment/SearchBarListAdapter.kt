@@ -47,7 +47,7 @@ abstract class SearchBarListAdapter<T>: ListAdapter<SearchBarListItem<T>, Search
 
     class ViewHolder(val binding: ItemListBinding): RecyclerView.ViewHolder(binding.root)
 
-    protected abstract fun bind(viewHolder: ViewHolder, searchBarListItem: SearchBarListItem<T>)
+    protected abstract fun bind(viewHolder: ViewHolder, position: Int, searchBarListItem: SearchBarListItem<T>)
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -65,7 +65,7 @@ abstract class SearchBarListAdapter<T>: ListAdapter<SearchBarListItem<T>, Search
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        bind(holder, getItem(position))
+        bind(holder, position, getItem(position))
     }
 
     protected abstract fun filter(searchBarListItem: SearchBarListItem<T>, searchWord: String): SearchBarListItem<T>?

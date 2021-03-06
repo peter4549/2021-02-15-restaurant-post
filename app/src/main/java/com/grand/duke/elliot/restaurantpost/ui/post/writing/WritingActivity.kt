@@ -4,7 +4,11 @@ import android.Manifest
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
+import android.os.Build.VERSION
+import android.os.Build.VERSION_CODES
 import android.os.Bundle
+import android.transition.Fade
+import android.transition.Transition
 import android.util.TypedValue
 import android.view.*
 import android.widget.Toast
@@ -42,8 +46,9 @@ import com.grand.duke.elliot.restaurantpost.ui.google_maps.GoogleMapsActivity
 import com.grand.duke.elliot.restaurantpost.ui.place.DisplayPlaceListDialogFragment
 import com.grand.duke.elliot.restaurantpost.ui.place.PlaceEditingDialogFragment
 import com.grand.duke.elliot.restaurantpost.ui.post.list.PostListFragment
+import com.grand.duke.elliot.restaurantpost.ui.post.photo.PhotoAdapter
 import com.grand.duke.elliot.restaurantpost.ui.post.photo.PhotoHelper
-import com.grand.duke.elliot.restaurantpost.ui.post.photo.PhotoUriStringAdapter
+import com.grand.duke.elliot.restaurantpost.ui.post.photo.PhotoListFragment
 import com.grand.duke.elliot.restaurantpost.ui.tag.DisplayTagListDialogFragment
 import com.grand.duke.elliot.restaurantpost.ui.tag.TagEditingDialogFragment
 import com.grand.duke.elliot.restaurantpost.ui.util.*
@@ -58,8 +63,9 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import dagger.android.AndroidInjection
 import timber.log.Timber
-import java.lang.NullPointerException
 import javax.inject.Inject
+import kotlin.math.ceil
+
 
 class WritingActivity: AppCompatActivity(),
     ObservableScrollViewCallbacks, OnMapReadyCallback,
@@ -75,7 +81,7 @@ class WritingActivity: AppCompatActivity(),
 
     private lateinit var viewModel: WritingViewModel
     private lateinit var binding: ActivityWritingBinding
-    private lateinit var photoUriStringAdapter: PhotoUriStringAdapter
+    private lateinit var photoAdapter: PhotoAdapter
 
     private val menuRes = R.menu.menu_writing_activity
 
@@ -84,11 +90,12 @@ class WritingActivity: AppCompatActivity(),
 
     private lateinit var uiController: UiController
 
-    private var mediumAnimationDuration = 0
-    private var shortAnimationDuration = 0
+    private val mediumAnimationDuration: Int by lazy { resources.getInteger(android.R.integer.config_mediumAnimTime) }
+    private val shortAnimationDuration: Int by lazy { resources.getInteger(android.R.integer.config_shortAnimTime) }
 
     private var parallaxImageHeight = 0
-    private var toolbarHeight = 0
+    private val statusBarHeight: Int by lazy { statusBarHeight() }
+    private val toolbarHeight: Int by lazy { actionBarSize() + statusBarHeight }
 
     private var bottomSheetIsShown = true
     private var bottomSheetHeight = 0F
@@ -110,14 +117,35 @@ class WritingActivity: AppCompatActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
+        window?.requestFeature(Window.FEATURE_CONTENT_TRANSITIONS)
         super.onCreate(savedInstanceState)
 
         val post = intent.getParcelableExtra<Post>(PostListFragment.ExtraName.Post)
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_writing)
         viewModel = viewModelFactory.create(post, localRepository)
+
+        with(window) {
+            window.statusBarColor = Color.TRANSPARENT
+            window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+
+            allowEnterTransitionOverlap = true
+            allowReturnTransitionOverlap = true
+
+            val fade = Fade().apply {
+                duration = shortAnimationDuration.toLong()
+            }
+
+            fade.excludeTarget(android.R.id.statusBarBackground, true)
+            fade.excludeTarget(android.R.id.navigationBarBackground, true)
+            fade.excludeTarget(R.id.appbar_layout, true)
+            fade.excludeTarget(R.id.toolbar, true)
+
+            enterTransition = fade
+            exitTransition = fade
+        }
+
         init()
-        setFrameLayoutSpaceHeight()
     }
 
     override fun onResume() {
@@ -126,15 +154,9 @@ class WritingActivity: AppCompatActivity(),
     }
 
     private fun init() {
-        mediumAnimationDuration = resources.getInteger(android.R.integer.config_mediumAnimTime)
-        shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
-
-        parallaxImageHeight = resources.getDimensionPixelSize(R.dimen.parallax_image_height)
-        toolbarHeight = actionBarSize()
-
         bottomSheetHeight = convertDpToPx(
-            this,
-            resources.getDimension(R.dimen.bottom_sheet_height) / resources.displayMetrics.density
+                this,
+                resources.getDimension(R.dimen.bottom_sheet_height) / resources.displayMetrics.density
         )
 
         FluidContentResize.listen(this)
@@ -147,28 +169,36 @@ class WritingActivity: AppCompatActivity(),
 
     private fun initLiveData() {
         viewModel.photoUriStringList.observe(this, { photoUriStringList ->
-            if (this::photoUriStringAdapter.isInitialized.not())
+            if (this::photoAdapter.isInitialized.not())
                 uiController.initViewPager()
 
             if (photoUriStringList.isEmpty()) {
-                binding.toolbar.setBackgroundColor(MainApplication.themePrimaryColor)
-                binding.relativeLayoutViewPager.hide()
+                binding.constraintLayoutToolbar.setBackgroundColor(MainApplication.themePrimaryColor)
+                binding.constraintLayoutViewPager.hide()
 
                 if (binding.viewAnchor.isVisible.not())
                     binding.viewAnchor.show()
             } else {
-                if (binding.relativeLayoutViewPager.isVisible.not()) {
-                    binding.toolbar.setBackgroundColor(Color.TRANSPARENT)
-                    binding.toolbar.invalidate()
-                    binding.relativeLayoutViewPager.show()
+                if (binding.constraintLayoutViewPager.isVisible.not()) {
+                    binding.constraintLayoutToolbar.setBackgroundColor(Color.TRANSPARENT)
+                    binding.constraintLayoutToolbar.invalidate()
+                    binding.constraintLayoutViewPager.show()
                 }
 
-                if (binding.viewAnchor.isVisible)
+                if (binding.viewAnchor.isVisible) {
                     binding.viewAnchor.hide()
+                    val params = binding.frameLayoutSpace.layoutParams
+
+                    if (binding.constraintLayoutViewPager.isVisible)
+                        params.height = toolbarHeight
+
+                    binding.frameLayoutSpace.layoutParams = params
+                }
             }
 
-            photoUriStringAdapter.submitList(photoUriStringList)
-            photoUriStringAdapter.notifyDataSetChanged()
+            photoAdapter.submitList(photoUriStringList)
+            photoAdapter.notifyDataSetChanged()
+            binding.wormDotsIndicator.invalidate()
         })
 
         viewModel.folder.observe(this, { folder ->
@@ -203,7 +233,7 @@ class WritingActivity: AppCompatActivity(),
             val changeType = displayTagList.changeType
             val tagList = displayTagList.tagList
 
-            when(changeType) {
+            when (changeType) {
                 DisplayTagList.ChangeType.Initialized -> {
                     for (tag in tagList) {
                         val chip = Chip(this).apply {
@@ -286,8 +316,8 @@ class WritingActivity: AppCompatActivity(),
             }
 
             override fun onPermissionRationaleShouldBeShown(
-                permissions: MutableList<PermissionRequest>?,
-                token: PermissionToken?
+                    permissions: MutableList<PermissionRequest>?,
+                    token: PermissionToken?
             ) {
                 token?.run { continuePermissionRequest() }
             }
@@ -295,8 +325,8 @@ class WritingActivity: AppCompatActivity(),
 
         Dexter.withContext(this)
             .withPermissions(
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION
             )
             .withListener(multiplePermissionListener)
             .check()
@@ -327,15 +357,36 @@ class WritingActivity: AppCompatActivity(),
         }
 
         fun initViewPager() {
-            photoUriStringAdapter = PhotoUriStringAdapter()
-            photoUriStringAdapter.setOnItemClickListener(object :
-                PhotoUriStringAdapter.OnItemClickListener {
+            photoAdapter = PhotoAdapter()
+            photoAdapter.setOnItemClickListener(object :
+                    PhotoAdapter.OnItemClickListener {
                 override fun onClick(uriString: String) {
-                    // TODO: implement. goto photo view. (fragment.)
+                    supportFragmentManager.beginTransaction()
+                        .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+                        .addToBackStack(null)
+                        .replace(R.id.constraint_layout, PhotoListFragment()).commit()
+                }
+
+                override fun onRemoveClick(uriString: String) {
+                    showMaterialAlertDialog(
+                        title = getString(R.string.delete_image_title),
+                        message = getString(R.string.delete_image_message),
+                        neutralButtonText = null,
+                        neutralButtonClickListener = null,
+                        negativeButtonText = getString(R.string.do_not_delete),
+                        negativeButtonClickListener = { dialogInterface, _ ->
+                            dialogInterface?.dismiss()
+                        },
+                        positiveButtonText = getString(R.string.delete),
+                        positiveButtonClickListener = { dialogInterface, _ ->
+                            viewModel.removePhotoUri(uriString)
+                            dialogInterface?.dismiss()
+                        }
+                    )
                 }
             })
 
-            binding.viewPager.adapter = photoUriStringAdapter
+            binding.viewPager.adapter = photoAdapter
             binding.wormDotsIndicator.setViewPager2(binding.viewPager)
         }
 
@@ -352,16 +403,16 @@ class WritingActivity: AppCompatActivity(),
                     bottomSheetIsShown -> {
                         binding.imageViewArrowDropDown.rotate(180F, shortAnimationDuration)
                         binding.linearLayoutBottomSheet.hideDown(
-                            shortAnimationDuration,
-                            bottomSheetHeight
+                                shortAnimationDuration,
+                                bottomSheetHeight
                         )
                         false
                     }
                     else -> {
                         binding.imageViewArrowDropDown.rotate(0F, shortAnimationDuration)
                         binding.linearLayoutBottomSheet.showUp(
-                            shortAnimationDuration,
-                            bottomSheetHeight
+                                shortAnimationDuration,
+                                bottomSheetHeight
                         )
                         true
                     }
@@ -396,24 +447,24 @@ class WritingActivity: AppCompatActivity(),
                 val simpleListDialogFragment = SimpleListDialogFragment()
                 simpleListDialogFragment.setTitle(getString(R.string.photo))
                 simpleListDialogFragment.setItems(
-                    arrayListOf(
-                        SimpleItem(
-                            SimpleItemId.ImageCapture,
-                            getString(R.string.photo_shoot),
-                            ContextCompat.getDrawable(
-                                this@WritingActivity,
-                                R.drawable.ic_round_photo_camera_24
-                            )
-                        ),
-                        SimpleItem(
-                            SimpleItemId.ImagePick,
-                            getString(R.string.select_from_album),
-                            ContextCompat.getDrawable(
-                                this@WritingActivity,
-                                R.drawable.ic_round_insert_photo_24
-                            )
+                        arrayListOf(
+                                SimpleItem(
+                                        SimpleItemId.ImageCapture,
+                                        getString(R.string.photo_shoot),
+                                        ContextCompat.getDrawable(
+                                                this@WritingActivity,
+                                                R.drawable.ic_round_photo_camera_24
+                                        )
+                                ),
+                                SimpleItem(
+                                        SimpleItemId.ImagePick,
+                                        getString(R.string.select_from_album),
+                                        ContextCompat.getDrawable(
+                                                this@WritingActivity,
+                                                R.drawable.ic_round_insert_photo_24
+                                        )
+                                )
                         )
-                    )
                 )
 
                 simpleListDialogFragment.run { show(supportFragmentManager, tag) }
@@ -423,6 +474,32 @@ class WritingActivity: AppCompatActivity(),
         private fun initToolbar() {
             setSupportActionBar(binding.toolbar)
             supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+            binding.constraintLayoutToolbar.setPadding(0, statusBarHeight, 0, 0)
+
+            window?.sharedElementEnterTransition?.addListener(object : Transition.TransitionListener {
+                override fun onTransitionStart(transition: Transition?) {
+                    viewModel.post?.let {
+                        if (it.photoUriStringArray.isNotEmpty())
+                            binding.toolbar.hide()
+                    }
+                }
+
+                override fun onTransitionEnd(transition: Transition?) {
+                    if (binding.toolbar.isVisible.not())
+                        binding.toolbar.fadeIn(shortAnimationDuration)
+
+                    window?.sharedElementEnterTransition?.removeListener(this)
+                }
+
+                override fun onTransitionCancel(transition: Transition?) {}
+                override fun onTransitionPause(transition: Transition?) {}
+                override fun onTransitionResume(transition: Transition?) {}
+            })
+
+            val params: ViewGroup.LayoutParams = binding.viewAnchor.layoutParams
+            params.height = toolbarHeight
+            binding.viewAnchor.requestLayout()
         }
     }
 
@@ -459,7 +536,7 @@ class WritingActivity: AppCompatActivity(),
                 if (isChanged())
                     showSaveConfirmationDialog()
                 else
-                    finish()
+                    customFinish()
                 true
             }
             R.id.item_save -> {
@@ -469,34 +546,10 @@ class WritingActivity: AppCompatActivity(),
                         WritingViewModel.Mode.Edit -> finishWithUpdate()
                     }
                 } else
-                    finish()
+                    customFinish()
                 true
             }
             else -> false
-        }
-    }
-
-    private fun setFrameLayoutSpaceHeight() {
-        binding.frameLayout.post {
-            run {
-                binding.observableScrollView.post {
-                        binding.relativeLayoutViewPager.post {
-                            binding.frameLayoutSpace.post {
-                                var height = binding.frameLayout.height - binding.observableScrollView.height
-
-                                if (viewModel.post?.photoUriStringArray.isNullOrEmpty().not())
-                                    height += resources.getDimension(R.dimen.parallax_image_height).toInt() -
-                                            actionBarSize().toPx().toInt() +
-                                            resources.getDimension(R.dimen.spacing_small).toInt()
-
-                                val params = binding.frameLayoutSpace.layoutParams
-                                params.height = height
-                                binding.frameLayoutSpace.layoutParams = params
-                                Timber.d("binding.frameLayoutSpace.height: $height")
-                            }
-                        }
-                }
-            }
         }
     }
 
@@ -552,11 +605,11 @@ class WritingActivity: AppCompatActivity(),
 
     private fun createPost(): Post {
         return Post(
-            description = binding.editTextDescription.text.toString(),
-            folderId = viewModel.folder()?.id ?: noFolderSelected,
-            modifiedTime = viewModel.modifiedTime,
-            photoUriStringArray = viewModel.photoUriList().toTypedArray(),
-            placeId = viewModel.place()?.id ?: noPlaceSelected
+                description = binding.editTextDescription.text.toString(),
+                folderId = viewModel.folder()?.id ?: noFolderSelected,
+                modifiedTime = viewModel.modifiedTime,
+                photoUriStringArray = viewModel.photoUriList().toTypedArray(),
+                placeId = viewModel.place()?.id ?: noPlaceSelected
         )
     }
 
@@ -565,16 +618,27 @@ class WritingActivity: AppCompatActivity(),
         val text = getString(R.string.failed_to_save_post)
         viewModel.insertPost(post) { throwable ->
             throwable?.let { showToast(text) }
-            finish()
+            customFinish()
+        }
+    }
+
+    private fun updatePost() {
+        viewModel.post?.apply {
+            description = binding.editTextDescription.text.toString()
+            folderId = viewModel.folder()?.id ?: noFolderSelected
+            modifiedTime = System.currentTimeMillis()
+            photoUriStringArray = viewModel.photoUriList().toTypedArray()
+            placeId = viewModel.place()?.id ?: noPlaceSelected
         }
     }
 
     private fun finishWithUpdate() {
+        updatePost()
         val text = getString(R.string.post_update_failed)
         viewModel.post?.let {
             viewModel.updatePost(it) { throwable ->
                 throwable?.let { showToast(text) }
-                finish()
+                customFinish()
             }
         }
     }
@@ -583,25 +647,38 @@ class WritingActivity: AppCompatActivity(),
         if (isChanged())
             showSaveConfirmationDialog()
         else
-            finish()
+            customFinish()
+    }
+
+    private fun customFinish() {
+        if (binding.constraintLayoutViewPager.isVisible) {
+            binding.observableScrollView.fullScroll(View.FOCUS_UP)
+            binding.constraintLayoutToolbar.fadeOut(shortAnimationDuration) {
+                finishAfterTransition()
+            }
+        } else
+            finishAfterTransition()
     }
 
     /** ObservableScrollViewCallbacks. */
     override fun onScrollChanged(scrollY: Int, firstScroll: Boolean, dragging: Boolean) {
+        if (parallaxImageHeight < 1)
+            parallaxImageHeight = binding.constraintLayoutViewPager.height
+
         val alpha = 1F.coerceAtMost(scrollY / (parallaxImageHeight - toolbarHeight).toFloat())
 
-        if (binding.relativeLayoutViewPager.isVisible)
-            binding.toolbar.setBackgroundColor(
-                ScrollUtils.getColorWithAlpha(
-                    alpha,
-                    MainApplication.themePrimaryColor
-                )
+        if (binding.constraintLayoutViewPager.isVisible)
+            binding.constraintLayoutToolbar.setBackgroundColor(
+                    ScrollUtils.getColorWithAlpha(
+                            alpha,
+                            MainApplication.themePrimaryColor
+                    )
             )
         else
-            binding.toolbar.setBackgroundColor(MainApplication.themePrimaryColor)
+            binding.constraintLayoutToolbar.setBackgroundColor(MainApplication.themePrimaryColor)
 
-        if (binding.relativeLayoutViewPager.isVisible)
-            binding.relativeLayoutViewPager.translationY = scrollY / 2F
+        if (binding.constraintLayoutViewPager.isVisible)
+            binding.constraintLayoutViewPager.translationY = scrollY / 2F
     }
 
     override fun onDownMotionEvent() {}
@@ -613,11 +690,25 @@ class WritingActivity: AppCompatActivity(),
 
         if (theme.resolveAttribute(android.R.attr.actionBarSize, typedValue, true))
             actionBarSize = TypedValue.complexToDimensionPixelSize(
-                typedValue.data,
-                resources.displayMetrics
+                    typedValue.data,
+                    resources.displayMetrics
             )
 
         return actionBarSize
+    }
+
+    private fun statusBarHeight(): Int {
+        val identifier = resources.getIdentifier("status_bar_height", "dimen", "android")
+
+        if (identifier > 0)
+            return resources.getDimensionPixelSize(identifier)
+
+        val statusBarHeight = if (VERSION.SDK_INT >= VERSION_CODES.M)
+            24
+        else
+            25
+
+        return ceil(statusBarHeight.toDouble()).toInt()
     }
 
     private fun showToast(text: String, duration: Int = Toast.LENGTH_LONG) {
@@ -637,38 +728,38 @@ class WritingActivity: AppCompatActivity(),
                 getString(R.string.change_confirmation_dialog_message)
 
         showMaterialAlertDialog(
-            title = title,
-            message = message,
-            neutralButtonText = getString(R.string.cancel),
-            neutralButtonClickListener = { dialogInterface, _ ->
-                dialogInterface?.dismiss()
-            },
-            negativeButtonText = getString(R.string.do_not_save),
-            negativeButtonClickListener = { dialogInterface, _ ->
-                finish()
-                dialogInterface?.dismiss()
-            },
-            positiveButtonText = getString(R.string.save),
-            positiveButtonClickListener = { dialogInterface, _ ->
-                if (viewModel.mode() == WritingViewModel.Mode.Creation)
-                    this.finishWithSave()
-                else
-                    finishWithUpdate()
+                title = title,
+                message = message,
+                neutralButtonText = getString(R.string.cancel),
+                neutralButtonClickListener = { dialogInterface, _ ->
+                    dialogInterface?.dismiss()
+                },
+                negativeButtonText = getString(R.string.do_not_save),
+                negativeButtonClickListener = { dialogInterface, _ ->
+                    customFinish()
+                    dialogInterface?.dismiss()
+                },
+                positiveButtonText = getString(R.string.save),
+                positiveButtonClickListener = { dialogInterface, _ ->
+                    if (viewModel.mode() == WritingViewModel.Mode.Creation)
+                        this.finishWithSave()
+                    else
+                        finishWithUpdate()
 
-                dialogInterface?.dismiss()
-            }
+                    dialogInterface?.dismiss()
+                }
         )
     }
 
     private fun showMaterialAlertDialog(
-        title: String?,
-        message: String?,
-        neutralButtonText: String?,
-        neutralButtonClickListener: ((DialogInterface?, Int) -> Unit)?,
-        negativeButtonText: String?,
-        negativeButtonClickListener: ((DialogInterface?, Int) -> Unit)?,
-        positiveButtonText: String?,
-        positiveButtonClickListener: ((DialogInterface?, Int) -> Unit)?
+            title: String?,
+            message: String?,
+            neutralButtonText: String?,
+            neutralButtonClickListener: ((DialogInterface?, Int) -> Unit)?,
+            negativeButtonText: String?,
+            negativeButtonClickListener: ((DialogInterface?, Int) -> Unit)?,
+            positiveButtonText: String?,
+            positiveButtonClickListener: ((DialogInterface?, Int) -> Unit)?
     ) {
         MaterialAlertDialogBuilder(this)
             .setTitle(title)
@@ -694,7 +785,9 @@ class WritingActivity: AppCompatActivity(),
                         FolderEditingDialogFragment().run { show(supportFragmentManager, tag) }
                     is DisplayTagListDialogFragment ->
                         TagEditingDialogFragment().run { show(supportFragmentManager, tag) }
-                    is DisplayPlaceListDialogFragment -> { startGoogleMapsActivity() }
+                    is DisplayPlaceListDialogFragment -> {
+                        startGoogleMapsActivity()
+                    }
                 }
             }
         }

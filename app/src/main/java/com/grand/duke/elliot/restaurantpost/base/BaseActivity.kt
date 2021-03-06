@@ -2,7 +2,8 @@ package com.grand.duke.elliot.restaurantpost.base
 
 import android.content.DialogInterface
 import android.os.Bundle
-import android.transition.Explode
+import android.transition.Fade
+import android.transition.TransitionInflater
 import android.view.Window
 import android.widget.Toast
 import androidx.annotation.CallSuper
@@ -12,33 +13,30 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.viewbinding.ViewBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.grand.duke.elliot.restaurantpost.R
 import dagger.android.AndroidInjection
 import javax.inject.Inject
 
-abstract class BaseActivity<viewModel: ViewModel, viewDataBinding: ViewDataBinding> : AppCompatActivity() {
+
+abstract class BaseActivity<VM : ViewModel, VDB : ViewDataBinding> : AppCompatActivity() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
-    protected lateinit var viewModel: viewModel
-    protected lateinit var viewDataBinding: viewDataBinding
+    protected lateinit var viewModel: VM
+    protected lateinit var viewDataBinding: VDB
 
     @get:LayoutRes
     protected abstract val layoutRes: Int
 
-    protected abstract fun viewModel(): Class<viewModel>
+    protected abstract fun viewModel(): Class<VM>
 
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
-
-        with(window) {
-            supportRequestWindowFeature(Window.FEATURE_CONTENT_TRANSITIONS)
-            enterTransition = Explode()
-            exitTransition = Explode()
-        }
 
         viewModel = ViewModelProvider(viewModelStore, viewModelFactory).get(viewModel())
         viewDataBinding = DataBindingUtil.setContentView(this, layoutRes)

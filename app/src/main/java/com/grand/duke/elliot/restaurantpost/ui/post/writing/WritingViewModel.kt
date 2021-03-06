@@ -203,6 +203,12 @@ class WritingViewModel @AssistedInject constructor(
         _photoUriStringList.value = value
     }
 
+    fun removePhotoUri(uriString: String) {
+        val value = photoUriStringList.value
+        value?.remove(uriString)
+        _photoUriStringList.value = value
+    }
+
     fun setPlace(place: Place?) {
         _place.value = place
     }

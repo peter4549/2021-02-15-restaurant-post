@@ -10,7 +10,7 @@ class DisplayFolderListAdapter : SearchBarListAdapter<DisplayFolder>() {
 
     override fun deepCopy(item: DisplayFolder): DisplayFolder = item.deepCopy()
 
-    override fun bind(viewHolder: ViewHolder, searchBarListItem: SearchBarListItem<DisplayFolder>) {
+    override fun bind(viewHolder: ViewHolder, position: Int, searchBarListItem: SearchBarListItem<DisplayFolder>) {
         val displayFolder = searchBarListItem.item
         viewHolder.binding.appCompatCheckBox.visibility = View.GONE
         viewHolder.binding.imageView.visibility = View.GONE

@@ -21,32 +21,6 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:text="2월 20일" />
 
-        <RelativeLayout
-            android:id="@+id/relative_layout_view_pager"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toTopOf="@+id/text_view_title"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/text_view_date">
-
-            <com.grand.duke.elliot.restaurantpost.ui.util.view.ClickableViewPager
-                android:id="@+id/view_pager"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <com.rd.PageIndicatorView
-                android:id="@+id/page_indicator_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"
-                android:layout_marginBottom="8dp"
-                app:piv_padding="8dp"
-                app:piv_radius="4dp"
-                app:piv_viewPager="@id/view_pager" />
-        </RelativeLayout>
-
         <TextView
             android:id="@+id/text_view_title"
             android:layout_width="0dp"
@@ -67,7 +41,6 @@
             android:layout_height="24dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/relative_layout_view_pager"
             tools:ignore="ContentDescription" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -1,14 +1,11 @@
 package com.grand.duke.elliot.restaurantpost.ui.post.list
 
 import android.content.Context
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.viewpager.widget.PagerAdapter
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.grand.duke.elliot.restaurantpost.R
 import kotlinx.android.synthetic.main.item_view_pager.view.image_view
 
@@ -25,13 +22,11 @@ class PhotoPagerAdapter(private val photoUriStringArray: Array<String>): PagerAd
         Glide.with(context)
                 .load(photoUriString)
                 .centerCrop()
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .error(R.drawable.ic_round_error_24)
-                .skipMemoryCache(true)
-                .transition(DrawableTransitionOptions.withCrossFade())
                 .into(view.image_view)
 
         container.addView(view)
+
         return view
     }
 

@@ -14,5 +14,8 @@
         <!-- Customize your theme here. -->
 
         <item name="chipStyle">@style/Widget.App.Chip</item>
+
+        <item name="android:windowDrawsSystemBarBackgrounds">false</item>
+        <item name="android:windowTranslucentStatus">true</item>
     </style>
 </resources>

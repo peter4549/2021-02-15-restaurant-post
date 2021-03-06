@@ -1,12 +1,16 @@
 package com.grand.duke.elliot.restaurantpost.ui.home
 
+import android.app.ActivityOptions
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.ColorRes
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -17,6 +21,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.grand.duke.elliot.restaurantpost.R
 import com.grand.duke.elliot.restaurantpost.base.BaseFragment
 import com.grand.duke.elliot.restaurantpost.databinding.FragmentTabDrawerBinding
+import com.grand.duke.elliot.restaurantpost.databinding.ItemFramePostBinding
 import com.grand.duke.elliot.restaurantpost.repository.data.DisplayFolder
 import com.grand.duke.elliot.restaurantpost.repository.data.DisplayPlace
 import com.grand.duke.elliot.restaurantpost.repository.data.DisplayTag
@@ -74,6 +79,7 @@ class TabFragment: BaseFragment<MainViewModel, FragmentTabDrawerBinding>(),
 
         initAdapter()
         initFlowable()
+        initLiveData()
 
         return view
     }
@@ -125,7 +131,10 @@ class TabFragment: BaseFragment<MainViewModel, FragmentTabDrawerBinding>(),
             displayTagListAdapter.apply {
                 setOnTagCheckedChangeListener(object: DisplayTagListAdapter.OnTagCheckedChangeListener {
                     override fun onTagCheckedChange(id: Long, isChecked: Boolean) {
-
+                        if (isChecked)
+                            viewModel.addTagWithPostList(id)
+                        else
+                            viewModel.removeTagWithPostList(id)
                     }
                 })
             }
@@ -225,6 +234,28 @@ class TabFragment: BaseFragment<MainViewModel, FragmentTabDrawerBinding>(),
                 }, {
                     Timber.e(it)
                 }))
+    }
+
+    private fun initLiveData() {
+        viewModel.clickedPostAndViewHolder.observe(viewLifecycleOwner, {
+            if (it == null)
+                return@observe
+
+            val intent = Intent(requireActivity(), WritingActivity::class.java)
+            intent.putExtra(PostListFragment.ExtraName.Post, it.post)
+
+            val activityOptions = ActivityOptions
+                    .makeSceneTransitionAnimation(
+                            requireActivity(),
+                            (it.viewHolder.binding as ItemFramePostBinding).constraintLayoutViewPager,
+                            "view_pager"
+                    ).toBundle()
+            startActivity(intent, activityOptions)
+        })
+
+        viewModel.uncheckedTag.observe(viewLifecycleOwner, {
+            it?.let { displayTagListAdapter.uncheck(it.id) }
+        })
     }
 
     private fun initAdapter() {

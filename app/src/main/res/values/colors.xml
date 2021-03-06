@@ -20,8 +20,8 @@
     <color name="chip_background">@color/surface</color>
 
     <!-- WormDotsIndicator -->
-    <color name="worm_dots_indicator_dots">@color/white</color>
-    <color name="worm_dots_indicator_dots_stroke">@color/white</color>
+    <color name="worm_dots_indicator_dots">@color/disabled</color>
+    <color name="worm_dots_indicator_selected_dot">@color/white</color>
 
     <color name="end_icon">@color/high_emphasis</color>
 

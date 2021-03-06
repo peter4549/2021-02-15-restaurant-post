@@ -19,20 +19,20 @@ import com.grand.duke.elliot.restaurantpost.ui.home.MainViewModel
 import dagger.android.support.AndroidSupportInjection
 import javax.inject.Inject
 
-abstract class BaseFragment<viewModel: ViewModel, viewDataBinding: ViewDataBinding>: Fragment() {
+abstract class BaseFragment<VM: ViewModel, VDB: ViewDataBinding>: Fragment() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
-    protected lateinit var viewModel: viewModel
-    protected lateinit var viewDataBinding: viewDataBinding
+    protected lateinit var viewModel: VM
+    protected lateinit var viewDataBinding: VDB
 
     protected abstract val useSharedViewModel: Boolean
 
     @get:LayoutRes
     protected abstract val layoutRes: Int
 
-    protected abstract fun viewModel(): Class<viewModel>
+    protected abstract fun viewModel(): Class<VM>
 
     override fun onAttach(context: Context) {
         AndroidSupportInjection.inject(this)

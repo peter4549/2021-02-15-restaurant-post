@@ -1,24 +1,28 @@
 package com.grand.duke.elliot.restaurantpost.ui.post.list
 
-import android.app.ActivityOptions
-import android.content.Intent
 import android.os.Bundle
-import android.transition.Explode
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.google.android.material.chip.Chip
 import com.grand.duke.elliot.restaurantpost.R
 import com.grand.duke.elliot.restaurantpost.base.BaseFragment
 import com.grand.duke.elliot.restaurantpost.databinding.FragmentPostListBinding
-import com.grand.duke.elliot.restaurantpost.databinding.ItemFramePostBinding
 import com.grand.duke.elliot.restaurantpost.persistence.data.Post
 import com.grand.duke.elliot.restaurantpost.ui.home.MainViewModel
-import com.grand.duke.elliot.restaurantpost.ui.post.writing.WritingActivity
+import com.grand.duke.elliot.restaurantpost.ui.home.PostAndViewHolder
 import io.reactivex.disposables.CompositeDisposable
 
 class PostListFragment: BaseFragment<MainViewModel, FragmentPostListBinding>() {
+
+    private var isFolderSelected = false
+    private var isPlaceSelected = false
+
+    private var folderChip: Chip? = null
+    private var placeChip: Chip? = null
+
+    private val tagChipList = mutableListOf<Chip>()
 
     override val useSharedViewModel: Boolean
         get() = true
@@ -40,16 +44,7 @@ class PostListFragment: BaseFragment<MainViewModel, FragmentPostListBinding>() {
     private val postAdapter = PostAdapter().apply {
         setOnItemClickListener(object: PostAdapter.OnItemClickListener {
             override fun onItemClick(holder: PostAdapter.ViewHolder, post: Post) {
-                val intent = Intent(requireActivity(), WritingActivity::class.java)
-                intent.putExtra(ExtraName.Post, post)
-
-                val activityOptions = ActivityOptions
-                        .makeSceneTransitionAnimation(
-                                requireActivity(),
-                                (holder.binding as ItemFramePostBinding).relativeLayoutViewPager,
-                                "view_pager"
-                        ).toBundle()
-                startActivity(intent, activityOptions)
+                viewModel.setClickedPostAndViewHolder(PostAndViewHolder(post, holder))
             }
         })
     }
@@ -78,14 +73,75 @@ class PostListFragment: BaseFragment<MainViewModel, FragmentPostListBinding>() {
             }
         })
 
-        viewModel.selectedFolder.observe(viewLifecycleOwner, {
+        viewModel.selectedFolder.observe(viewLifecycleOwner, { folder ->
+            folder?.let {
+                folderChip = Chip(requireContext()).apply {
+                    tag = folder.id
+                    text = folder.name
+                    setOnCloseIconClickListener {
+                        viewModel.setSelectedFolder(null)
+                    }
+                }
 
+                viewDataBinding.chipGroup.addView(folderChip, 0)
+                isFolderSelected = true
+            } ?: run {
+                folderChip?.let {
+                    viewDataBinding.chipGroup.removeView(it)
+                    isFolderSelected = false
+                }
+            }
         })
-    }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.invalidateLiveData()
+        viewModel.selectedPlace.observe(viewLifecycleOwner, { place ->
+            place?.let {
+                placeChip = Chip(requireContext()).apply {
+                    tag = place.id
+                    text = place.name
+                    setOnCloseIconClickListener {
+                        viewModel.setSelectedPlace(null)
+                    }
+                }
+
+                var index = 0
+
+                if (isFolderSelected && viewDataBinding.chipGroup.childCount > 0)
+                    ++index
+
+                viewDataBinding.chipGroup.addView(placeChip, index)
+                isPlaceSelected = true
+            } ?: run {
+                placeChip?.let {
+                    viewDataBinding.chipGroup.removeView(it)
+                    isPlaceSelected = false
+                }
+            }
+        })
+
+        viewModel.checkedTag.observe(viewLifecycleOwner, { tag ->
+            tag?.let {
+                val tagId = tag.id
+                val text = tag.name
+
+                val chip = Chip(requireContext()).apply {
+                    this.tag = tagId
+                    this.text = text
+                    setOnCloseIconClickListener {
+                        viewModel.removeTagWithPostList(tagId)
+                    }
+                }
+
+                if (tagChipList.add(chip))
+                    viewDataBinding.chipGroup.addView(chip)
+            }
+        })
+
+        viewModel.uncheckedTag.observe(viewLifecycleOwner, { tag ->
+            tagChipList.singleOrNull { chip -> chip.tag == tag.id }?.let {
+                if (tagChipList.remove(it))
+                    viewDataBinding.chipGroup.removeView(it)
+            }
+        })
     }
 
     override fun onDestroyView() {

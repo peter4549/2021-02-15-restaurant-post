@@ -2,13 +2,16 @@ package com.grand.duke.elliot.restaurantpost.ui.tag
 
 import com.grand.duke.elliot.restaurantpost.application.MainApplication
 import com.grand.duke.elliot.restaurantpost.repository.data.DisplayTag
-import com.grand.duke.elliot.restaurantpost.ui.util.dialog_fragment.SearchBarListItem
 import com.grand.duke.elliot.restaurantpost.ui.util.dialog_fragment.SearchBarListAdapter
+import com.grand.duke.elliot.restaurantpost.ui.util.dialog_fragment.SearchBarListItem
 import com.grand.duke.elliot.restaurantpost.ui.util.hide
 import com.grand.duke.elliot.restaurantpost.ui.util.setTextWithSearchWordColorChange
 import com.grand.duke.elliot.restaurantpost.ui.util.show
 
 class DisplayTagListAdapter(private val useCheckBox: Boolean = false): SearchBarListAdapter<DisplayTag>() {
+
+    private val positionOf = hashMapOf<Long, Int>()
+    private var uncheckedTagPosition = -1
 
     private var onTagCheckedChangeListener: OnTagCheckedChangeListener? = null
 
@@ -22,7 +25,7 @@ class DisplayTagListAdapter(private val useCheckBox: Boolean = false): SearchBar
 
     override fun deepCopy(item: DisplayTag): DisplayTag = item.deepCopy()
 
-    override fun bind(viewHolder: ViewHolder, searchBarListItem: SearchBarListItem<DisplayTag>) {
+    override fun bind(viewHolder: ViewHolder, position: Int, searchBarListItem: SearchBarListItem<DisplayTag>) {
         val displayTag = searchBarListItem.item
 
         if (useCheckBox) {
@@ -39,10 +42,10 @@ class DisplayTagListAdapter(private val useCheckBox: Boolean = false): SearchBar
         viewHolder.binding.viewColorBar.hide()
 
         setTextWithSearchWordColorChange(
-                viewHolder.binding.textViewName,
-                displayTag.tag.name,
-                searchWord,
-                MainApplication.themePrimaryColor
+            viewHolder.binding.textViewName,
+            displayTag.tag.name,
+            searchWord,
+            MainApplication.themePrimaryColor
         )
 
         viewHolder.binding.textViewCount.text = displayTag.postListCount.toString()
@@ -52,10 +55,31 @@ class DisplayTagListAdapter(private val useCheckBox: Boolean = false): SearchBar
         }
 
         viewHolder.binding.root.setOnClickListener {
-            onItemClickListener?.onItemClick(searchBarListItem.item, viewHolder.absoluteAdapterPosition)
+            onItemClickListener?.onItemClick(
+                searchBarListItem.item,
+                viewHolder.absoluteAdapterPosition
+            )
 
-            if (useCheckBox)
+            if (useCheckBox) {
                 viewHolder.binding.appCompatCheckBox.toggle()
+
+                if (viewHolder.binding.appCompatCheckBox.isChecked)
+                    positionOf[displayTag.tag.id] = position
+                else
+                    positionOf[displayTag.tag.id] = -1
+            }
+        }
+
+        if (position == uncheckedTagPosition) {
+            viewHolder.binding.appCompatCheckBox.isChecked = false
+            uncheckedTagPosition = -1
+        }
+    }
+
+    fun uncheck(id: Long) {
+        positionOf[id]?.let {
+            uncheckedTagPosition = it
+            notifyItemChanged(it)
         }
     }
 

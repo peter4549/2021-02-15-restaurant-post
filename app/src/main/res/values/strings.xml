@@ -6,6 +6,7 @@
     <string name="calendar">달력</string>
     <string name="cancel">취소</string>
     <string name="delete">삭제</string>
+    <string name="do_not_delete">삭제 안 함</string>
     <string name="do_not_save">저장 안 함</string>
     <string name="edit">편집</string>
     <string name="ok">확인</string>
@@ -20,6 +21,8 @@
     <!-- WritingActivity. -->
     <string name="change_confirmation_dialog_title">변경사항 저장</string>
     <string name="change_confirmation_dialog_message">변경사항을 저장하시겠습니까?</string>
+    <string name="delete_image_message">이미지를 삭제하시겠습니까?</string>
+    <string name="delete_image_title">이미지 삭제</string>
     <string name="edit_text_description_hint">여기에 입력하세요.</string>
     <string name="failed_to_save_post">포스트를 저장하지 못했습니다.</string>
     <string name="photo">사진</string>

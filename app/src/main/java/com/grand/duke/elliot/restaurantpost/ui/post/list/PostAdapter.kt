@@ -49,16 +49,21 @@ class PostAdapter: ListAdapter<AdapterItem, PostAdapter.ViewHolder>(PostDiffCall
 
                     post.photoUriStringArray.let {
                         if (it.isEmpty())
-                            binding.relativeLayoutViewPager.hide()
+                            binding.constraintLayoutViewPager.hide()
                         else {
-                            binding.relativeLayoutViewPager.show()
+                            binding.constraintLayoutViewPager.show()
                             binding.viewPager.adapter = PhotoPagerAdapter(it)
+                            binding.wormDotsIndicator.setViewPager(binding.viewPager)
                         }
                     }
 
                     binding.textViewTitle.text = post.description
 
                     binding.root.setOnClickListener {
+                        onItemClickListener?.onItemClick(this, post)
+                    }
+
+                    binding.viewPager.setSingleTapUpListener {
                         onItemClickListener?.onItemClick(this, post)
                     }
                 }

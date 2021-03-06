@@ -22,7 +22,7 @@ class DisplayPlaceListAdapter(private val useCheckBox: Boolean = false): SearchB
 
     override fun deepCopy(item: DisplayPlace): DisplayPlace = item.deepCopy()
 
-    override fun bind(viewHolder: ViewHolder, searchBarListItem: SearchBarListItem<DisplayPlace>) {
+    override fun bind(viewHolder: ViewHolder, position: Int, searchBarListItem: SearchBarListItem<DisplayPlace>) {
         val displayPlace = searchBarListItem.item
 
         if (useCheckBox) {
