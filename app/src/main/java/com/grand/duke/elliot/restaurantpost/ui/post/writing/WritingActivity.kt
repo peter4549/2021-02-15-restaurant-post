@@ -63,9 +63,9 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import dagger.android.AndroidInjection
 import timber.log.Timber
+import java.util.ArrayList
 import javax.inject.Inject
 import kotlin.math.ceil
-
 
 class WritingActivity: AppCompatActivity(),
     ObservableScrollViewCallbacks, OnMapReadyCallback,
@@ -113,6 +113,11 @@ class WritingActivity: AppCompatActivity(),
 
     private object RequestCode {
         const val GoogleMapsActivity = 13
+    }
+
+    private object FragmentTag {
+        const val PhotoList = "com.grand.duke.elliot.restaurantpost.ui.post.writing" +
+                ".writing_activity.fragment_tag.photo_list"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -361,27 +366,40 @@ class WritingActivity: AppCompatActivity(),
             photoAdapter.setOnItemClickListener(object :
                     PhotoAdapter.OnItemClickListener {
                 override fun onClick(uriString: String) {
+                    if (viewModel.photoUriList().isEmpty())
+                        return
+
+                    val bundle = Bundle()
+                    bundle.putStringArrayList(
+                            PhotoListFragment.Key.PhotoUriStringArrayList,
+                            viewModel.photoUriList() as ArrayList<String>
+                    )
+
+                    val photoListFragment = PhotoListFragment()
+                    photoListFragment.arguments = bundle
+
                     supportFragmentManager.beginTransaction()
-                        .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
-                        .addToBackStack(null)
-                        .replace(R.id.constraint_layout, PhotoListFragment()).commit()
+                            .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+                            .addToBackStack(null)
+                            .replace(R.id.frame_layout_photo_list, photoListFragment, FragmentTag.PhotoList)
+                            .commit()
                 }
 
                 override fun onRemoveClick(uriString: String) {
                     showMaterialAlertDialog(
-                        title = getString(R.string.delete_image_title),
-                        message = getString(R.string.delete_image_message),
-                        neutralButtonText = null,
-                        neutralButtonClickListener = null,
-                        negativeButtonText = getString(R.string.do_not_delete),
-                        negativeButtonClickListener = { dialogInterface, _ ->
-                            dialogInterface?.dismiss()
-                        },
-                        positiveButtonText = getString(R.string.delete),
-                        positiveButtonClickListener = { dialogInterface, _ ->
-                            viewModel.removePhotoUri(uriString)
-                            dialogInterface?.dismiss()
-                        }
+                            title = getString(R.string.delete_image_title),
+                            message = getString(R.string.delete_image_message),
+                            neutralButtonText = null,
+                            neutralButtonClickListener = null,
+                            negativeButtonText = getString(R.string.do_not_delete),
+                            negativeButtonClickListener = { dialogInterface, _ ->
+                                dialogInterface?.dismiss()
+                            },
+                            positiveButtonText = getString(R.string.delete),
+                            positiveButtonClickListener = { dialogInterface, _ ->
+                                viewModel.removePhotoUri(uriString)
+                                dialogInterface?.dismiss()
+                            }
                     )
                 }
             })
@@ -644,10 +662,14 @@ class WritingActivity: AppCompatActivity(),
     }
 
     override fun onBackPressed() {
-        if (isChanged())
-            showSaveConfirmationDialog()
-        else
-            customFinish()
+        supportFragmentManager.findFragmentByTag(FragmentTag.PhotoList)?.let {
+            super.onBackPressed()
+        } ?: run {
+            if (isChanged())
+                showSaveConfirmationDialog()
+            else
+                customFinish()
+        }
     }
 
     private fun customFinish() {

@@ -12,6 +12,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.model.RectangularBounds
 import com.google.android.libraries.places.widget.Autocomplete
 import com.google.android.libraries.places.widget.AutocompleteActivity
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
@@ -103,6 +104,7 @@ class GoogleMapsActivity: BaseActivity<GoogleMapsViewModel, ActivityGoogleMapsBi
                 Place.Field.LAT_LNG,
                 Place.Field.NAME
         )
+        
         val intent = Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
                 .apply { viewModel.countryCode?.let { setCountries(listOf(it)) } }
                 .build(this)
